@@ -25,7 +25,11 @@ import {
 
 type PageId = 'leaderboards' | 'arena';
 type ArenaId = 'idea' | 'experiment' | 'writing' | 'plotting';
-type RoundId = 'round-1';
+type RoundId =
+  | 'idea-round-1'
+  | 'experiment-round-1'
+  | 'writing-round-1'
+  | 'plotting-round-1';
 
 const CLAWS = [
   {
@@ -167,20 +171,68 @@ const arenaCards = [
   },
 ];
 
-const rounds = [
-  {
-    id: 'round-1' as const,
-    label: 'Round 1',
-    subtitle: '第一回合',
-    prompt: 'Baseline ideation prompts with the current four research claws.',
-  },
-];
+const arenaRounds: Record<
+  ArenaId,
+  Array<{
+    id: RoundId;
+    label: string;
+    subtitle: string;
+    prompt: string;
+    status: 'Ready' | 'Coming Soon';
+    details: string;
+  }>
+> = {
+  idea: [
+    {
+      id: 'idea-round-1',
+      label: 'Round 1',
+      subtitle: '第一回合',
+      prompt: 'Baseline ideation prompts with the current four research claws.',
+      status: 'Ready',
+      details:
+        'This round compares first-pass research idea generation quality, novelty, and actionability across the current four claws.',
+    },
+  ],
+  experiment: [
+    {
+      id: 'experiment-round-1',
+      label: 'Round 1',
+      subtitle: 'Coming Soon',
+      prompt: 'Experiment protocol comparisons will be added here when the benchmark rubric is finalized.',
+      status: 'Coming Soon',
+      details:
+        'This track is reserved for experimental design, ablation planning, and methodology comparison rounds.',
+    },
+  ],
+  writing: [
+    {
+      id: 'writing-round-1',
+      label: 'Round 1',
+      subtitle: 'Coming Soon',
+      prompt: 'Writing evaluation rounds will appear here after the shared drafting templates are locked.',
+      status: 'Coming Soon',
+      details:
+        'This track will focus on technical writing clarity, structure, and revision quality for research outputs.',
+    },
+  ],
+  plotting: [
+    {
+      id: 'plotting-round-1',
+      label: 'Round 1',
+      subtitle: 'Coming Soon',
+      prompt: 'Plotting rounds will cover chart design, visual reasoning, and figure communication once published.',
+      status: 'Coming Soon',
+      details:
+        'This track is for figure planning, plotting choices, and chart storytelling under research constraints.',
+    },
+  ],
+};
 
 export default function App() {
   const [activePage, setActivePage] = useState<PageId>('leaderboards');
   const [selectedClaws, setSelectedClaws] = useState<string[]>(clawsWithOverall.slice(0, 3).map((claw) => claw.id));
   const [activeArena, setActiveArena] = useState<ArenaId>('idea');
-  const [activeRound, setActiveRound] = useState<RoundId>('round-1');
+  const [activeRound, setActiveRound] = useState<RoundId>('idea-round-1');
 
   const pageMeta = pages.find((page) => page.id === activePage)!;
 
@@ -272,7 +324,10 @@ export default function App() {
             <ArenaPage
               activeArena={activeArena}
               activeRound={activeRound}
-              onSelectArena={setActiveArena}
+              onSelectArena={(arena) => {
+                setActiveArena(arena);
+                setActiveRound(arenaRounds[arena][0].id);
+              }}
               onSelectRound={setActiveRound}
             />
           )}
@@ -539,7 +594,9 @@ function ArenaPage({
   onSelectArena: (arena: ArenaId) => void;
   onSelectRound: (round: RoundId) => void;
 }) {
-  const selectedRound = rounds.find((round) => round.id === activeRound)!;
+  const selectedArena = arenaCards.find((card) => card.id === activeArena)!;
+  const selectedRounds = arenaRounds[activeArena];
+  const selectedRound = selectedRounds.find((round) => round.id === activeRound) ?? selectedRounds[0];
 
   return (
     <>
@@ -561,7 +618,6 @@ function ArenaPage({
       <section>
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-bold">Competition Tracks</h3>
-          <span className="text-sm text-neutral-500">1 live track, 3 upcoming</span>
         </div>
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
@@ -573,14 +629,11 @@ function ArenaPage({
               <button
                 key={card.id}
                 type="button"
-                onClick={() => card.available && onSelectArena(card.id)}
-                disabled={!card.available}
+                onClick={() => onSelectArena(card.id)}
                 className={`rounded-2xl border bg-white p-6 text-left shadow-sm transition-all ${
-                  card.available
-                    ? active
-                      ? 'border-blue-200 ring-2 ring-blue-100'
-                      : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50'
-                    : 'cursor-not-allowed border-neutral-200 opacity-70'
+                  active
+                    ? 'border-blue-200 ring-2 ring-blue-100'
+                    : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50'
                 }`}
               >
                 <div className="mb-5 flex items-start justify-between gap-4">
@@ -600,14 +653,8 @@ function ArenaPage({
                 <p className="mb-5 text-sm leading-relaxed text-neutral-600">{card.blurb}</p>
 
                 <div className="flex items-center gap-2 text-sm font-medium text-neutral-500">
-                  {card.available ? (
-                    <>
-                      Enter track
-                      <ChevronRight size={16} />
-                    </>
-                  ) : (
-                    'Waiting for release'
-                  )}
+                  Enter track
+                  <ChevronRight size={16} />
                 </div>
               </button>
             );
@@ -615,21 +662,26 @@ function ArenaPage({
         </div>
       </section>
 
-      {activeArena === 'idea' ? (
-        <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+      <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
           <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
             <div className="mb-5 flex items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-400">Idea Generation</p>
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-400">{selectedArena.title}</p>
                 <h3 className="mt-2 text-lg font-bold">Select a comparison round</h3>
               </div>
-              <div className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700">
-                Current track
+              <div
+                className={`rounded-full px-3 py-1.5 text-sm font-medium ${
+                  selectedRound.status === 'Ready'
+                    ? 'border border-blue-100 bg-blue-50 text-blue-700'
+                    : 'border border-neutral-200 bg-neutral-100 text-neutral-600'
+                }`}
+              >
+                {selectedRound.status}
               </div>
             </div>
 
             <div className="grid gap-4">
-              {rounds.map((round) => {
+              {selectedRounds.map((round) => {
                 const active = round.id === activeRound;
                 return (
                   <button
@@ -651,10 +703,14 @@ function ArenaPage({
                       </div>
                       <div
                         className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
-                          active ? 'bg-white text-blue-700' : 'bg-neutral-100 text-neutral-500'
+                          active
+                            ? 'bg-white text-blue-700'
+                            : round.status === 'Ready'
+                              ? 'bg-neutral-100 text-neutral-500'
+                              : 'bg-neutral-100 text-neutral-500'
                         }`}
                       >
-                        {active ? 'Selected' : 'Ready'}
+                        {active ? 'Selected' : round.status}
                       </div>
                     </div>
                     <p className={`mt-3 text-sm leading-relaxed ${active ? 'text-blue-800' : 'text-neutral-600'}`}>
@@ -672,6 +728,7 @@ function ArenaPage({
               {selectedRound.label} <span className="text-neutral-400">/ {selectedRound.subtitle}</span>
             </h3>
             <p className="mt-4 text-sm leading-relaxed text-neutral-600">{selectedRound.prompt}</p>
+            <p className="mt-3 text-sm leading-relaxed text-neutral-500">{selectedRound.details}</p>
 
             <div className="mt-6 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
               <div className="mb-3 flex items-center justify-between">
@@ -691,8 +748,7 @@ function ArenaPage({
               </div>
             </div>
           </div>
-        </section>
-      ) : null}
+      </section>
     </>
   );
 }
