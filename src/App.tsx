@@ -1,17 +1,38 @@
-import { useState, ReactNode } from 'react';
-import { 
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, 
-  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend 
+import {ReactNode, useState} from 'react';
+import {
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
 } from 'recharts';
-import { Github, Trophy, Zap, Clock, CheckCircle, Star, Lightbulb, PenTool, Image as ImageIcon, FlaskConical, ChevronRight } from 'lucide-react';
+import {
+  Github,
+  Trophy,
+  Zap,
+  Clock,
+  CheckCircle,
+  Star,
+  Lightbulb,
+  PenTool,
+  Image as ImageIcon,
+  FlaskConical,
+  ChevronRight,
+} from 'lucide-react';
 
-// --- Mock Data ---
+type PageId = 'leaderboards' | 'arena';
+type ArenaId = 'idea' | 'experiment' | 'writing' | 'plotting';
+type RoundId = 'round-1';
+
 const CLAWS = [
   {
     id: 'claw-claude3',
     name: 'Claw-Claude-3',
     version: 'Opus',
-    color: '#8b5cf6', // violet-500
+    color: '#8b5cf6',
     scores: {
       idea: 95,
       writing: 98,
@@ -21,13 +42,13 @@ const CLAWS = [
       timeEff: 70,
       completion: 95,
       quality: 96,
-    }
+    },
   },
   {
     id: 'claw-gpt4',
     name: 'Claw-GPT-4',
     version: 'Turbo',
-    color: '#10b981', // emerald-500
+    color: '#10b981',
     scores: {
       idea: 92,
       writing: 95,
@@ -37,13 +58,13 @@ const CLAWS = [
       timeEff: 65,
       completion: 98,
       quality: 94,
-    }
+    },
   },
   {
     id: 'claw-gemini15',
     name: 'Claw-Gemini-1.5',
     version: 'Pro',
-    color: '#3b82f6', // blue-500
+    color: '#3b82f6',
     scores: {
       idea: 90,
       writing: 92,
@@ -53,13 +74,13 @@ const CLAWS = [
       timeEff: 88,
       completion: 92,
       quality: 90,
-    }
+    },
   },
   {
     id: 'claw-llama3',
     name: 'Claw-Llama-3',
     version: '70B',
-    color: '#f59e0b', // amber-500
+    color: '#f59e0b',
     scores: {
       idea: 85,
       writing: 88,
@@ -69,68 +90,134 @@ const CLAWS = [
       timeEff: 92,
       completion: 88,
       quality: 85,
-    }
-  }
+    },
+  },
 ];
 
-// Calculate overall scores
-const clawsWithOverall = CLAWS.map(claw => {
-  const capabilityAvg = (claw.scores.idea + claw.scores.writing + claw.scores.plotting + claw.scores.experiment) / 4;
-  const performanceAvg = (claw.scores.tokenEff + claw.scores.timeEff + claw.scores.completion + claw.scores.quality) / 4;
+const clawsWithOverall = CLAWS.map((claw) => {
+  const capabilityAvg =
+    (claw.scores.idea + claw.scores.writing + claw.scores.plotting + claw.scores.experiment) / 4;
+  const performanceAvg =
+    (claw.scores.tokenEff + claw.scores.timeEff + claw.scores.completion + claw.scores.quality) / 4;
   const overall = Math.round((capabilityAvg + performanceAvg) / 2);
-  return { ...claw, overall, capabilityAvg, performanceAvg };
+  return {...claw, overall, capabilityAvg, performanceAvg};
 }).sort((a, b) => b.overall - a.overall);
 
-// Prepare data for Radar Charts
 const capabilityData = [
-  { subject: 'Idea Gen', 'Claw-Claude-3': 95, 'Claw-GPT-4': 92, 'Claw-Gemini-1.5': 90, 'Claw-Llama-3': 85 },
-  { subject: 'Writing', 'Claw-Claude-3': 98, 'Claw-GPT-4': 95, 'Claw-Gemini-1.5': 92, 'Claw-Llama-3': 88 },
-  { subject: 'Plotting', 'Claw-Claude-3': 80, 'Claw-GPT-4': 88, 'Claw-Gemini-1.5': 85, 'Claw-Llama-3': 70 },
-  { subject: 'Experiment', 'Claw-Claude-3': 82, 'Claw-GPT-4': 85, 'Claw-Gemini-1.5': 90, 'Claw-Llama-3': 75 },
+  {subject: 'Idea Gen', 'Claw-Claude-3': 95, 'Claw-GPT-4': 92, 'Claw-Gemini-1.5': 90, 'Claw-Llama-3': 85},
+  {subject: 'Writing', 'Claw-Claude-3': 98, 'Claw-GPT-4': 95, 'Claw-Gemini-1.5': 92, 'Claw-Llama-3': 88},
+  {subject: 'Plotting', 'Claw-Claude-3': 80, 'Claw-GPT-4': 88, 'Claw-Gemini-1.5': 85, 'Claw-Llama-3': 70},
+  {subject: 'Experiment', 'Claw-Claude-3': 82, 'Claw-GPT-4': 85, 'Claw-Gemini-1.5': 90, 'Claw-Llama-3': 75},
 ];
 
 const performanceData = [
-  { subject: 'Token Eff', 'Claw-Claude-3': 75, 'Claw-GPT-4': 70, 'Claw-Gemini-1.5': 85, 'Claw-Llama-3': 95 },
-  { subject: 'Time Eff', 'Claw-Claude-3': 70, 'Claw-GPT-4': 65, 'Claw-Gemini-1.5': 88, 'Claw-Llama-3': 92 },
-  { subject: 'Completion', 'Claw-Claude-3': 95, 'Claw-GPT-4': 98, 'Claw-Gemini-1.5': 92, 'Claw-Llama-3': 88 },
-  { subject: 'Quality', 'Claw-Claude-3': 96, 'Claw-GPT-4': 94, 'Claw-Gemini-1.5': 90, 'Claw-Llama-3': 85 },
+  {subject: 'Token Eff', 'Claw-Claude-3': 75, 'Claw-GPT-4': 70, 'Claw-Gemini-1.5': 85, 'Claw-Llama-3': 95},
+  {subject: 'Time Eff', 'Claw-Claude-3': 70, 'Claw-GPT-4': 65, 'Claw-Gemini-1.5': 88, 'Claw-Llama-3': 92},
+  {subject: 'Completion', 'Claw-Claude-3': 95, 'Claw-GPT-4': 98, 'Claw-Gemini-1.5': 92, 'Claw-Llama-3': 88},
+  {subject: 'Quality', 'Claw-Claude-3': 96, 'Claw-GPT-4': 94, 'Claw-Gemini-1.5': 90, 'Claw-Llama-3': 85},
 ];
 
+const pages = [
+  {
+    id: 'leaderboards' as const,
+    label: 'Leaderboards',
+    description: 'Ranking view and score breakdowns',
+    icon: Trophy,
+  },
+  {
+    id: 'arena' as const,
+    label: 'Arena',
+    description: 'Arena tracks and round selection',
+    icon: FlaskConical,
+  },
+];
+
+const arenaCards = [
+  {
+    id: 'idea' as const,
+    title: 'Idea Generation',
+    blurb: 'Compare prompt ideation rounds and select a benchmark round for direct model matchups.',
+    accent: 'bg-blue-50 text-blue-700 border-blue-100',
+    icon: Lightbulb,
+    available: true,
+  },
+  {
+    id: 'experiment' as const,
+    title: 'Experiment',
+    blurb: 'Experiment design battles will land here after the first arena track is finalized.',
+    accent: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+    icon: FlaskConical,
+    available: false,
+  },
+  {
+    id: 'writing' as const,
+    title: 'Writing',
+    blurb: 'Writing-focused arena prompts and review rounds are reserved for a later release.',
+    accent: 'bg-amber-50 text-amber-700 border-amber-100',
+    icon: PenTool,
+    available: false,
+  },
+  {
+    id: 'plotting' as const,
+    title: 'Plotting',
+    blurb: 'Visualization and plotting contests are planned but not published yet.',
+    accent: 'bg-violet-50 text-violet-700 border-violet-100',
+    icon: ImageIcon,
+    available: false,
+  },
+];
+
+const rounds = [
+  {
+    id: 'round-1' as const,
+    label: 'Round 1',
+    subtitle: '第一回合',
+    prompt: 'Baseline ideation prompts with the current four research claws.',
+  },
+];
 
 export default function App() {
-  const [selectedClaws, setSelectedClaws] = useState<string[]>(clawsWithOverall.slice(0, 3).map(c => c.id));
+  const [activePage, setActivePage] = useState<PageId>('leaderboards');
+  const [selectedClaws, setSelectedClaws] = useState<string[]>(clawsWithOverall.slice(0, 3).map((claw) => claw.id));
+  const [activeArena, setActiveArena] = useState<ArenaId>('idea');
+  const [activeRound, setActiveRound] = useState<RoundId>('round-1');
+
+  const pageMeta = pages.find((page) => page.id === activePage)!;
 
   const toggleClaw = (id: string) => {
     if (selectedClaws.includes(id)) {
       if (selectedClaws.length > 1) {
-        setSelectedClaws(selectedClaws.filter(c => c !== id));
+        setSelectedClaws(selectedClaws.filter((clawId) => clawId !== id));
       }
-    } else {
-      if (selectedClaws.length < 4) {
-        setSelectedClaws([...selectedClaws, id]);
-      }
+      return;
+    }
+
+    if (selectedClaws.length < 4) {
+      setSelectedClaws([...selectedClaws, id]);
     }
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 text-neutral-900 font-sans selection:bg-blue-200">
-      {/* Header */}
-      <header className="bg-white border-b border-neutral-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <div className="min-h-screen bg-neutral-50 text-neutral-900 selection:bg-blue-200">
+      <header className="sticky top-0 z-20 border-b border-neutral-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
-            <div className="bg-blue-600 text-white p-2 rounded-lg">
+            <div className="rounded-lg bg-blue-600 p-2 text-white">
               <FlaskConical size={20} />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-neutral-900">Research Claw Arena</h1>
-              <p className="text-xs text-neutral-500 font-medium uppercase tracking-wider">Agent Evaluation Benchmark</p>
+              <h1 className="text-xl font-bold tracking-tight">Research Claw Arena</h1>
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-neutral-500">
+                {pageMeta.label} Page
+              </p>
             </div>
           </div>
-          <a 
-            href="https://github.com" 
-            target="_blank" 
+
+          <a
+            href="https://github.com/LetItBe12345/research-claw-arena"
+            target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-2 text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors bg-neutral-100 hover:bg-neutral-200 px-3 py-1.5 rounded-md"
+            className="flex items-center gap-2 rounded-md bg-neutral-100 px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-200 hover:text-neutral-900"
           >
             <Github size={16} />
             <span className="hidden sm:inline">View on GitHub</span>
@@ -138,244 +225,62 @@ export default function App() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        
-        {/* Intro Section */}
-        <section className="bg-white rounded-2xl p-6 sm:p-8 border border-neutral-200 shadow-sm">
-          <div className="max-w-3xl">
-            <h2 className="text-2xl font-bold mb-4">Evaluating Research Agents</h2>
-            <p className="text-neutral-600 leading-relaxed mb-6">
-              This arena compares the capabilities of various "Research Claws" (AI agents designed for research tasks). 
-              We evaluate them across two primary dimensions: <strong>Capability Scope</strong> (Idea generation, Writing, Plotting, Experimentation) 
-              and <strong>Performance Metrics</strong> (Token efficiency, Time efficiency, Completion rate, Quality).
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-sm font-medium border border-blue-100">
-                <Lightbulb size={16} /> Capability Dimension
-              </div>
-              <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full text-sm font-medium border border-emerald-100">
-                <Zap size={16} /> Performance Dimension
-              </div>
-            </div>
-          </div>
-        </section>
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:px-8">
+        <aside className="lg:sticky lg:top-24 lg:h-fit">
+          <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-neutral-400">Navigate</p>
+            <nav className="flex gap-3 overflow-x-auto lg:flex-col">
+              {pages.map((page) => {
+                const Icon = page.icon;
+                const active = page.id === activePage;
 
-        {/* Leaderboard */}
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <Trophy className="text-amber-500" size={20} />
-              Arena Leaderboard
-            </h3>
-            <span className="text-sm text-neutral-500">Scores out of 100</span>
-          </div>
-          <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-neutral-50 text-neutral-500 uppercase tracking-wider text-xs border-b border-neutral-200">
-                  <tr>
-                    <th className="px-6 py-4 font-semibold">Rank</th>
-                    <th className="px-6 py-4 font-semibold">Model</th>
-                    <th className="px-6 py-4 font-semibold text-center bg-blue-50/50">Overall</th>
-                    <th className="px-6 py-4 font-semibold text-center" colSpan={4}>Capabilities</th>
-                    <th className="px-6 py-4 font-semibold text-center" colSpan={4}>Performance</th>
-                  </tr>
-                  <tr className="border-t border-neutral-100 text-[10px] text-neutral-400">
-                    <th className="px-6 py-2"></th>
-                    <th className="px-6 py-2"></th>
-                    <th className="px-6 py-2 bg-blue-50/50"></th>
-                    <th className="px-2 py-2 text-center" title="Idea Generation">Idea</th>
-                    <th className="px-2 py-2 text-center" title="Writing">Write</th>
-                    <th className="px-2 py-2 text-center" title="Plotting">Plot</th>
-                    <th className="px-2 py-2 text-center" title="Experimentation">Exp</th>
-                    <th className="px-2 py-2 text-center" title="Token Efficiency">Tokens</th>
-                    <th className="px-2 py-2 text-center" title="Time Efficiency">Time</th>
-                    <th className="px-2 py-2 text-center" title="Completion Rate">Comp</th>
-                    <th className="px-2 py-2 text-center" title="Quality">Qual</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-100">
-                  {clawsWithOverall.map((claw, idx) => (
-                    <tr key={claw.id} className="hover:bg-neutral-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
-                          idx === 0 ? 'bg-amber-100 text-amber-700' : 
-                          idx === 1 ? 'bg-neutral-200 text-neutral-700' : 
-                          idx === 2 ? 'bg-orange-100 text-orange-800' : 'text-neutral-500'
-                        }`}>
-                          {idx + 1}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: claw.color }}></div>
-                          <span className="font-semibold text-neutral-900">{claw.name}</span>
-                          <span className="text-xs text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-md">{claw.version}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center bg-blue-50/30">
-                        <span className="font-bold text-blue-700 text-base">{claw.overall}</span>
-                      </td>
-                      {/* Capabilities */}
-                      <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.idea}</td>
-                      <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.writing}</td>
-                      <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.plotting}</td>
-                      <td className="px-2 py-4 text-center font-mono text-neutral-600 border-r border-neutral-100">{claw.scores.experiment}</td>
-                      {/* Performance */}
-                      <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.tokenEff}</td>
-                      <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.timeEff}</td>
-                      <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.completion}</td>
-                      <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.quality}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        {/* Visual Comparison */}
-        <section>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-            <h3 className="text-lg font-bold">Visual Comparison</h3>
-            <div className="flex flex-wrap gap-2">
-              {clawsWithOverall.map(claw => (
-                <button
-                  key={claw.id}
-                  onClick={() => toggleClaw(claw.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                    selectedClaws.includes(claw.id) 
-                      ? 'bg-white shadow-sm border-neutral-300 text-neutral-900' 
-                      : 'bg-transparent border-transparent text-neutral-400 hover:text-neutral-600'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <div 
-                      className={`w-2 h-2 rounded-full ${selectedClaws.includes(claw.id) ? '' : 'opacity-50'}`} 
-                      style={{ backgroundColor: claw.color }}
-                    ></div>
-                    {claw.name}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Capability Radar */}
-            <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm flex flex-col items-center">
-              <h4 className="font-semibold text-neutral-700 mb-6 flex items-center gap-2">
-                <Lightbulb size={18} className="text-blue-500" />
-                Capability Scope
-              </h4>
-              <div className="w-full h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={capabilityData}>
-                    <PolarGrid stroke="#e5e5e5" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#525252', fontSize: 12 }} />
-                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#a3a3a3', fontSize: 10 }} />
-                    <Tooltip 
-                      contentStyle={{ borderRadius: '8px', border: '1px solid #e5e5e5', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    />
-                    <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
-                    {clawsWithOverall.filter(c => selectedClaws.includes(c.id)).map((claw, idx) => (
-                      <Radar
-                        key={claw.id}
-                        name={claw.name}
-                        dataKey={claw.name}
-                        stroke={claw.color}
-                        fill={claw.color}
-                        fillOpacity={0.2}
-                      />
-                    ))}
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Performance Radar */}
-            <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm flex flex-col items-center">
-              <h4 className="font-semibold text-neutral-700 mb-6 flex items-center gap-2">
-                <Zap size={18} className="text-emerald-500" />
-                Performance Metrics
-              </h4>
-              <div className="w-full h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={performanceData}>
-                    <PolarGrid stroke="#e5e5e5" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: '#525252', fontSize: 12 }} />
-                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#a3a3a3', fontSize: 10 }} />
-                    <Tooltip 
-                      contentStyle={{ borderRadius: '8px', border: '1px solid #e5e5e5', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    />
-                    <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} />
-                    {clawsWithOverall.filter(c => selectedClaws.includes(c.id)).map((claw, idx) => (
-                      <Radar
-                        key={claw.id}
-                        name={claw.name}
-                        dataKey={claw.name}
-                        stroke={claw.color}
-                        fill={claw.color}
-                        fillOpacity={0.2}
-                      />
-                    ))}
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Detailed Cards */}
-        <section>
-          <h3 className="text-lg font-bold mb-4">Detailed Profiles</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-            {clawsWithOverall.map(claw => (
-              <div key={claw.id} className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden flex flex-col">
-                <div className="p-5 border-b border-neutral-100" style={{ borderTop: `4px solid ${claw.color}` }}>
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-bold text-lg">{claw.name}</h4>
-                    <span className="text-xs font-medium bg-neutral-100 text-neutral-600 px-2 py-1 rounded-md">{claw.version}</span>
-                  </div>
-                  <div className="flex items-end gap-2 mt-4">
-                    <span className="text-3xl font-bold leading-none" style={{ color: claw.color }}>{claw.overall}</span>
-                    <span className="text-sm text-neutral-500 font-medium mb-1">Overall Score</span>
-                  </div>
-                </div>
-                
-                <div className="p-5 flex-1 bg-neutral-50/50">
-                  <div className="space-y-4">
-                    <div>
-                      <h5 className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-3">Capabilities</h5>
-                      <div className="space-y-2">
-                        <ScoreBar label="Idea Gen" score={claw.scores.idea} icon={<Lightbulb size={14} />} color={claw.color} />
-                        <ScoreBar label="Writing" score={claw.scores.writing} icon={<PenTool size={14} />} color={claw.color} />
-                        <ScoreBar label="Plotting" score={claw.scores.plotting} icon={<ImageIcon size={14} />} color={claw.color} />
-                        <ScoreBar label="Experiment" score={claw.scores.experiment} icon={<FlaskConical size={14} />} color={claw.color} />
+                return (
+                  <button
+                    key={page.id}
+                    type="button"
+                    onClick={() => setActivePage(page.id)}
+                    className={`min-w-[190px] rounded-2xl border px-4 py-3 text-left transition-all lg:min-w-0 ${
+                      active
+                        ? 'border-blue-200 bg-blue-50 text-blue-900 shadow-sm'
+                        : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50 hover:text-neutral-900'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`rounded-xl p-2 ${
+                          active ? 'bg-blue-600 text-white' : 'bg-neutral-100 text-neutral-500'
+                        }`}
+                      >
+                        <Icon size={16} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-semibold">{page.label}</div>
+                        <div className="text-xs text-neutral-500">{page.description}</div>
                       </div>
                     </div>
-                    
-                    <div className="pt-2">
-                      <h5 className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-3">Performance</h5>
-                      <div className="space-y-2">
-                        <ScoreBar label="Tokens" score={claw.scores.tokenEff} icon={<Zap size={14} />} color={claw.color} />
-                        <ScoreBar label="Time" score={claw.scores.timeEff} icon={<Clock size={14} />} color={claw.color} />
-                        <ScoreBar label="Completion" score={claw.scores.completion} icon={<CheckCircle size={14} />} color={claw.color} />
-                        <ScoreBar label="Quality" score={claw.scores.quality} icon={<Star size={14} />} color={claw.color} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+                  </button>
+                );
+              })}
+            </nav>
           </div>
-        </section>
+        </aside>
 
-      </main>
+        <main className="space-y-8">
+          {activePage === 'leaderboards' ? (
+            <LeaderboardsPage selectedClaws={selectedClaws} onToggleClaw={toggleClaw} />
+          ) : (
+            <ArenaPage
+              activeArena={activeArena}
+              activeRound={activeRound}
+              onSelectArena={setActiveArena}
+              onSelectRound={setActiveRound}
+            />
+          )}
+        </main>
+      </div>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-neutral-200 mt-12 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-neutral-500">
+      <footer className="mt-12 border-t border-neutral-200 bg-white py-8">
+        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-neutral-500 sm:px-6 lg:px-8">
           <p>Research Claw Arena &copy; {new Date().getFullYear()}. Built for GitHub Pages.</p>
           <p className="mt-2">Metrics are simulated for demonstration purposes.</p>
         </div>
@@ -384,22 +289,485 @@ export default function App() {
   );
 }
 
-function ScoreBar({ label, score, icon, color }: { label: string, score: number, icon: ReactNode, color: string }) {
+function LeaderboardsPage({
+  selectedClaws,
+  onToggleClaw,
+}: {
+  selectedClaws: string[];
+  onToggleClaw: (id: string) => void;
+}) {
+  return (
+    <>
+      <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="max-w-3xl">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700">
+            <Trophy size={16} />
+            Leaderboards
+          </div>
+          <h2 className="mb-4 text-2xl font-bold">Evaluating Research Agents</h2>
+          <p className="mb-6 leading-relaxed text-neutral-600">
+            This page compares the capabilities of various research claws across benchmark dimensions.
+            The current leaderboard focuses on capability scope and performance metrics, then expands into
+            chart overlays and detailed score profiles.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <div className="flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700">
+              <Lightbulb size={16} />
+              Capability Dimension
+            </div>
+            <div className="flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700">
+              <Zap size={16} />
+              Performance Dimension
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="flex items-center gap-2 text-lg font-bold">
+            <Trophy className="text-amber-500" size={20} />
+            Arena Leaderboard
+          </h3>
+          <span className="text-sm text-neutral-500">Scores out of 100</span>
+        </div>
+        <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-neutral-200 bg-neutral-50 text-xs uppercase tracking-wider text-neutral-500">
+                <tr>
+                  <th className="px-6 py-4 font-semibold">Rank</th>
+                  <th className="px-6 py-4 font-semibold">Model</th>
+                  <th className="bg-blue-50/50 px-6 py-4 text-center font-semibold">Overall</th>
+                  <th className="px-6 py-4 text-center font-semibold" colSpan={4}>
+                    Capabilities
+                  </th>
+                  <th className="px-6 py-4 text-center font-semibold" colSpan={4}>
+                    Performance
+                  </th>
+                </tr>
+                <tr className="border-t border-neutral-100 text-[10px] text-neutral-400">
+                  <th className="px-6 py-2"></th>
+                  <th className="px-6 py-2"></th>
+                  <th className="bg-blue-50/50 px-6 py-2"></th>
+                  <th className="px-2 py-2 text-center" title="Idea Generation">
+                    Idea
+                  </th>
+                  <th className="px-2 py-2 text-center" title="Writing">
+                    Write
+                  </th>
+                  <th className="px-2 py-2 text-center" title="Plotting">
+                    Plot
+                  </th>
+                  <th className="px-2 py-2 text-center" title="Experimentation">
+                    Exp
+                  </th>
+                  <th className="px-2 py-2 text-center" title="Token Efficiency">
+                    Tokens
+                  </th>
+                  <th className="px-2 py-2 text-center" title="Time Efficiency">
+                    Time
+                  </th>
+                  <th className="px-2 py-2 text-center" title="Completion Rate">
+                    Comp
+                  </th>
+                  <th className="px-2 py-2 text-center" title="Quality">
+                    Qual
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {clawsWithOverall.map((claw, idx) => (
+                  <tr key={claw.id} className="transition-colors hover:bg-neutral-50">
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <span
+                        className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
+                          idx === 0
+                            ? 'bg-amber-100 text-amber-700'
+                            : idx === 1
+                              ? 'bg-neutral-200 text-neutral-700'
+                              : idx === 2
+                                ? 'bg-orange-100 text-orange-800'
+                                : 'text-neutral-500'
+                        }`}
+                      >
+                        {idx + 1}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="h-3 w-3 rounded-full" style={{backgroundColor: claw.color}}></div>
+                        <span className="font-semibold text-neutral-900">{claw.name}</span>
+                        <span className="rounded-md bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">
+                          {claw.version}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap bg-blue-50/30 px-6 py-4 text-center">
+                      <span className="text-base font-bold text-blue-700">{claw.overall}</span>
+                    </td>
+                    <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.idea}</td>
+                    <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.writing}</td>
+                    <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.plotting}</td>
+                    <td className="border-r border-neutral-100 px-2 py-4 text-center font-mono text-neutral-600">
+                      {claw.scores.experiment}
+                    </td>
+                    <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.tokenEff}</td>
+                    <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.timeEff}</td>
+                    <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.completion}</td>
+                    <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.quality}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div className="mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <h3 className="text-lg font-bold">Visual Comparison</h3>
+          <div className="flex flex-wrap gap-2">
+            {clawsWithOverall.map((claw) => (
+              <button
+                key={claw.id}
+                type="button"
+                onClick={() => onToggleClaw(claw.id)}
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+                  selectedClaws.includes(claw.id)
+                    ? 'border-neutral-300 bg-white text-neutral-900 shadow-sm'
+                    : 'border-transparent bg-transparent text-neutral-400 hover:text-neutral-600'
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <div
+                    className={`h-2 w-2 rounded-full ${selectedClaws.includes(claw.id) ? '' : 'opacity-50'}`}
+                    style={{backgroundColor: claw.color}}
+                  ></div>
+                  {claw.name}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <ChartCard
+            title="Capability Scope"
+            icon={<Lightbulb size={18} className="text-blue-500" />}
+            data={capabilityData}
+            selectedClaws={selectedClaws}
+          />
+          <ChartCard
+            title="Performance Metrics"
+            icon={<Zap size={18} className="text-emerald-500" />}
+            data={performanceData}
+            selectedClaws={selectedClaws}
+          />
+        </div>
+      </section>
+
+      <section>
+        <h3 className="mb-4 text-lg font-bold">Detailed Profiles</h3>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+          {clawsWithOverall.map((claw) => (
+            <div key={claw.id} className="flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+              <div className="border-b border-neutral-100 p-5" style={{borderTop: `4px solid ${claw.color}`}}>
+                <div className="mb-2 flex items-start justify-between">
+                  <h4 className="text-lg font-bold">{claw.name}</h4>
+                  <span className="rounded-md bg-neutral-100 px-2 py-1 text-xs font-medium text-neutral-600">
+                    {claw.version}
+                  </span>
+                </div>
+                <div className="mt-4 flex items-end gap-2">
+                  <span className="text-3xl font-bold leading-none" style={{color: claw.color}}>
+                    {claw.overall}
+                  </span>
+                  <span className="mb-1 text-sm font-medium text-neutral-500">Overall Score</span>
+                </div>
+              </div>
+
+              <div className="flex-1 bg-neutral-50/50 p-5">
+                <div className="space-y-4">
+                  <div>
+                    <h5 className="mb-3 text-xs font-bold uppercase tracking-wider text-neutral-400">Capabilities</h5>
+                    <div className="space-y-2">
+                      <ScoreBar label="Idea Gen" score={claw.scores.idea} icon={<Lightbulb size={14} />} color={claw.color} />
+                      <ScoreBar label="Writing" score={claw.scores.writing} icon={<PenTool size={14} />} color={claw.color} />
+                      <ScoreBar label="Plotting" score={claw.scores.plotting} icon={<ImageIcon size={14} />} color={claw.color} />
+                      <ScoreBar
+                        label="Experiment"
+                        score={claw.scores.experiment}
+                        icon={<FlaskConical size={14} />}
+                        color={claw.color}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <h5 className="mb-3 text-xs font-bold uppercase tracking-wider text-neutral-400">Performance</h5>
+                    <div className="space-y-2">
+                      <ScoreBar label="Tokens" score={claw.scores.tokenEff} icon={<Zap size={14} />} color={claw.color} />
+                      <ScoreBar label="Time" score={claw.scores.timeEff} icon={<Clock size={14} />} color={claw.color} />
+                      <ScoreBar
+                        label="Completion"
+                        score={claw.scores.completion}
+                        icon={<CheckCircle size={14} />}
+                        color={claw.color}
+                      />
+                      <ScoreBar label="Quality" score={claw.scores.quality} icon={<Star size={14} />} color={claw.color} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </>
+  );
+}
+
+function ArenaPage({
+  activeArena,
+  activeRound,
+  onSelectArena,
+  onSelectRound,
+}: {
+  activeArena: ArenaId;
+  activeRound: RoundId;
+  onSelectArena: (arena: ArenaId) => void;
+  onSelectRound: (round: RoundId) => void;
+}) {
+  const selectedRound = rounds.find((round) => round.id === activeRound)!;
+
+  return (
+    <>
+      <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="max-w-3xl">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1.5 text-sm font-medium text-neutral-700">
+            <FlaskConical size={16} />
+            Arena
+          </div>
+          <h2 className="mb-4 text-2xl font-bold">Arena Tracks</h2>
+          <p className="leading-relaxed text-neutral-600">
+            The arena page is split into four competition tracks. Idea Generation is available now, while
+            Experiment, Writing, and Plotting stay visible as upcoming tracks so the navigation structure is
+            already in place.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-bold">Competition Tracks</h3>
+          <span className="text-sm text-neutral-500">1 live track, 3 upcoming</span>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+          {arenaCards.map((card) => {
+            const Icon = card.icon;
+            const active = activeArena === card.id;
+
+            return (
+              <button
+                key={card.id}
+                type="button"
+                onClick={() => card.available && onSelectArena(card.id)}
+                disabled={!card.available}
+                className={`rounded-2xl border bg-white p-6 text-left shadow-sm transition-all ${
+                  card.available
+                    ? active
+                      ? 'border-blue-200 ring-2 ring-blue-100'
+                      : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50'
+                    : 'cursor-not-allowed border-neutral-200 opacity-70'
+                }`}
+              >
+                <div className="mb-5 flex items-start justify-between gap-4">
+                  <div className={`rounded-2xl border px-3 py-2 ${card.accent}`}>
+                    <Icon size={18} />
+                  </div>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
+                      card.available ? 'bg-blue-50 text-blue-700' : 'bg-neutral-100 text-neutral-500'
+                    }`}
+                  >
+                    {card.available ? 'Available' : 'Coming Soon'}
+                  </span>
+                </div>
+
+                <h4 className="mb-2 text-xl font-bold">{card.title}</h4>
+                <p className="mb-5 text-sm leading-relaxed text-neutral-600">{card.blurb}</p>
+
+                <div className="flex items-center gap-2 text-sm font-medium text-neutral-500">
+                  {card.available ? (
+                    <>
+                      Enter track
+                      <ChevronRight size={16} />
+                    </>
+                  ) : (
+                    'Waiting for release'
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {activeArena === 'idea' ? (
+        <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+          <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-400">Idea Generation</p>
+                <h3 className="mt-2 text-lg font-bold">Select a comparison round</h3>
+              </div>
+              <div className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700">
+                Current track
+              </div>
+            </div>
+
+            <div className="grid gap-4">
+              {rounds.map((round) => {
+                const active = round.id === activeRound;
+                return (
+                  <button
+                    key={round.id}
+                    type="button"
+                    onClick={() => onSelectRound(round.id)}
+                    className={`rounded-2xl border px-5 py-4 text-left transition-all ${
+                      active
+                        ? 'border-blue-200 bg-blue-50 text-blue-900 shadow-sm'
+                        : 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-base font-semibold">{round.label}</div>
+                        <div className={`text-sm ${active ? 'text-blue-700' : 'text-neutral-500'}`}>
+                          {round.subtitle}
+                        </div>
+                      </div>
+                      <div
+                        className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
+                          active ? 'bg-white text-blue-700' : 'bg-neutral-100 text-neutral-500'
+                        }`}
+                      >
+                        {active ? 'Selected' : 'Ready'}
+                      </div>
+                    </div>
+                    <p className={`mt-3 text-sm leading-relaxed ${active ? 'text-blue-800' : 'text-neutral-600'}`}>
+                      {round.prompt}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-400">Round Details</p>
+            <h3 className="mt-2 text-lg font-bold">
+              {selectedRound.label} <span className="text-neutral-400">/ {selectedRound.subtitle}</span>
+            </h3>
+            <p className="mt-4 text-sm leading-relaxed text-neutral-600">{selectedRound.prompt}</p>
+
+            <div className="mt-6 rounded-2xl border border-neutral-200 bg-neutral-50 p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-sm font-semibold text-neutral-800">Participants</span>
+                <span className="text-xs uppercase tracking-[0.18em] text-neutral-400">4 claws</span>
+              </div>
+              <div className="space-y-3">
+                {clawsWithOverall.map((claw) => (
+                  <div key={claw.id} className="flex items-center justify-between rounded-xl bg-white px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: claw.color}}></div>
+                      <span className="font-medium text-neutral-800">{claw.name}</span>
+                    </div>
+                    <span className="text-sm text-neutral-500">{claw.version}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : null}
+    </>
+  );
+}
+
+function ChartCard({
+  title,
+  icon,
+  data,
+  selectedClaws,
+}: {
+  title: string;
+  icon: ReactNode;
+  data: Array<Record<string, string | number>>;
+  selectedClaws: string[];
+}) {
+  return (
+    <div className="flex flex-col items-center rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+      <h4 className="mb-6 flex items-center gap-2 font-semibold text-neutral-700">
+        {icon}
+        {title}
+      </h4>
+      <div className="h-[300px] w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
+            <PolarGrid stroke="#e5e5e5" />
+            <PolarAngleAxis dataKey="subject" tick={{fill: '#525252', fontSize: 12}} />
+            <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{fill: '#a3a3a3', fontSize: 10}} />
+            <Tooltip
+              contentStyle={{
+                borderRadius: '8px',
+                border: '1px solid #e5e5e5',
+                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+              }}
+            />
+            <Legend wrapperStyle={{fontSize: '12px', paddingTop: '20px'}} />
+            {clawsWithOverall
+              .filter((claw) => selectedClaws.includes(claw.id))
+              .map((claw) => (
+                <Radar
+                  key={claw.id}
+                  name={claw.name}
+                  dataKey={claw.name}
+                  stroke={claw.color}
+                  fill={claw.color}
+                  fillOpacity={0.2}
+                />
+              ))}
+          </RadarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+function ScoreBar({
+  label,
+  score,
+  icon,
+  color,
+}: {
+  label: string;
+  score: number;
+  icon: ReactNode;
+  color: string;
+}) {
   return (
     <div className="flex items-center gap-3 text-sm">
-      <div className="w-24 flex items-center gap-1.5 text-neutral-600">
+      <div className="flex w-24 items-center gap-1.5 text-neutral-600">
         <span className="text-neutral-400">{icon}</span>
         <span className="truncate">{label}</span>
       </div>
-      <div className="flex-1 h-2 bg-neutral-200 rounded-full overflow-hidden">
-        <div 
-          className="h-full rounded-full transition-all duration-500 ease-out"
-          style={{ width: `${score}%`, backgroundColor: color }}
-        />
+      <div className="h-2 flex-1 overflow-hidden rounded-full bg-neutral-200">
+        <div className="h-full rounded-full transition-all duration-500 ease-out" style={{width: `${score}%`, backgroundColor: color}} />
       </div>
-      <div className="w-8 text-right font-mono text-xs font-medium text-neutral-700">
-        {score}
-      </div>
+      <div className="w-8 text-right font-mono text-xs font-medium text-neutral-700">{score}</div>
     </div>
   );
 }
