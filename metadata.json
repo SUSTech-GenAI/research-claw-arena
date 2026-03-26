@@ -1,0 +1,5 @@
+{
+  "name": "Research Claw Arena",
+  "description": "A static frontend to compare the capabilities and performance of different research claws (agents).",
+  "requestFramePermissions": []
+}
