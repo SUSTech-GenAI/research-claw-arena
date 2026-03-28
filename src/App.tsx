@@ -137,7 +137,7 @@ const translations = {
       badge: 'Leaderboards',
       title: 'Evaluating Research Agents',
       intro:
-        'This page compares the capabilities of various research claws across benchmark dimensions. The current leaderboard focuses on capability scope and performance metrics, then expands into chart overlays and detailed score profiles.',
+        'This page gives an overview of the current Research Claw benchmark. It includes the leaderboard, the main comparison charts, and a detailed breakdown for each model.',
       capabilityDimension: 'Capability Dimension',
       performanceDimension: 'Performance Dimension',
       leaderboardTitle: 'Arena Leaderboard',
@@ -302,7 +302,7 @@ const translations = {
       badge: '排行榜',
       title: '研究智能体评测',
       intro:
-        '这个页面用于比较不同 Research Claw 在各项基准维度上的表现。当前排行榜聚焦能力范围与性能指标，并延伸到图表对比和详细画像卡片。',
+        '这个页面用于概览当前的 Research Claw benchmark，包括排行榜、主要对比图表，以及每个模型的详细拆解。',
       capabilityDimension: '能力维度',
       performanceDimension: '性能维度',
       leaderboardTitle: '竞技场排行榜',
