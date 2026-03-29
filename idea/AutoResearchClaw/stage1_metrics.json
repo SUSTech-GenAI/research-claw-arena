@@ -1,0 +1,24 @@
+{
+  "run_id": "stage1-metrics-20260328-105651",
+  "timestamp": "2026-03-28T10:58:37.873960+00:00",
+  "topic": "transformer attention mechanism efficiency",
+  "domains": "machine-learning",
+  "model": "kimi-k2.5",
+  "timing": {
+    "duration_sec": 105.963,
+    "duration_formatted": "1m45s"
+  },
+  "tokens": {
+    "input_chars": 2178,
+    "output_chars": 7294,
+    "estimated_input_tokens": 544,
+    "estimated_output_tokens": 1823,
+    "actual_prompt_tokens": 480,
+    "actual_completion_tokens": 3836,
+    "actual_total_tokens": 4316
+  },
+  "response_info": {
+    "finish_reason": "stop",
+    "truncated": false
+  }
+}

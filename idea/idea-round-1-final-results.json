@@ -1,0 +1,129 @@
+{
+  "scoring_version": "idea-scoring-v1",
+  "input_file": "idea/idea-round-1-score-input.with-judges.json",
+  "comparison_scope": "candidate_generation_cost",
+  "weights_profile": "default",
+  "weights": {
+    "research_value": 0.35,
+    "operability": 0.35,
+    "time_efficiency": 0.15,
+    "token_efficiency": 0.15
+  },
+  "computed_at": "2026-03-29T08:25:32.174Z",
+  "notes": "Current round input built from existing repository logs. Semantic judge scores can be added later under each candidate's judge_scores object.",
+  "candidates": [
+    {
+      "id": "auto-research-claw",
+      "name": "AutoResearchClaw",
+      "source": "idea/AutoResearchClaw/stage1_metrics.json",
+      "idea_text": "Use retriever-provided relevance scores to guide layerwise sparse and dense attention allocation in RAG systems for better efficiency-accuracy tradeoffs.",
+      "comparison_scope": "candidate_generation_cost",
+      "raw_inputs": {
+        "time_seconds": 105.963,
+        "total_tokens": 4316
+      },
+      "scores": {
+        "research_value": {
+          "value": 66,
+          "rounded": 66,
+          "outlierJudges": [],
+          "judgeCount": 3
+        },
+        "operability": {
+          "value": 82,
+          "rounded": 82,
+          "outlierJudges": [],
+          "judgeCount": 3
+        },
+        "time_efficiency": {
+          "value": 81.7,
+          "rounded": 82
+        },
+        "token_efficiency": {
+          "value": 100,
+          "rounded": 100
+        },
+        "overall": {
+          "value": 79.1,
+          "rounded": 79
+        }
+      }
+    },
+    {
+      "id": "dr-claw",
+      "name": "Dr. Claw",
+      "source": "idea/dr-claw/token-usage-summary.json#Idea Generation",
+      "idea_text": "Build a process reward model with explicit epistemic status typing so scientific reasoning can distinguish known facts, false claims, and novel unknowns during test-time search.",
+      "comparison_scope": "candidate_generation_cost",
+      "raw_inputs": {
+        "time_seconds": 70.78,
+        "total_tokens": 7096
+      },
+      "scores": {
+        "research_value": {
+          "value": 82,
+          "rounded": 82,
+          "outlierJudges": [],
+          "judgeCount": 3
+        },
+        "operability": {
+          "value": 63.3,
+          "rounded": 63,
+          "outlierJudges": [],
+          "judgeCount": 3
+        },
+        "time_efficiency": {
+          "value": 100,
+          "rounded": 100
+        },
+        "token_efficiency": {
+          "value": 78,
+          "rounded": 78
+        },
+        "overall": {
+          "value": 77.6,
+          "rounded": 78
+        }
+      }
+    },
+    {
+      "id": "ai-scientist-v2",
+      "name": "AI-SCIENTIST-V2",
+      "source": "idea/AI-SCIENTIST-V2/execution_log_kimi.json",
+      "idea_text": "Treat test-time compute as an experimental budget and allocate it adaptively to high-information reasoning steps in open-domain scientific discovery.",
+      "comparison_scope": "candidate_generation_cost",
+      "raw_inputs": {
+        "time_seconds": 85.73,
+        "total_tokens": 8400
+      },
+      "scores": {
+        "research_value": {
+          "value": 67.3,
+          "rounded": 67,
+          "outlierJudges": [
+            "claude"
+          ],
+          "judgeCount": 3
+        },
+        "operability": {
+          "value": 46.7,
+          "rounded": 47,
+          "outlierJudges": [],
+          "judgeCount": 3
+        },
+        "time_efficiency": {
+          "value": 90.9,
+          "rounded": 91
+        },
+        "token_efficiency": {
+          "value": 71.7,
+          "rounded": 72
+        },
+        "overall": {
+          "value": 64.3,
+          "rounded": 64
+        }
+      }
+    }
+  ]
+}

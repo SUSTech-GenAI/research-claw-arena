@@ -1,0 +1,136 @@
+{
+  "project": "Test-Time Computation for Open-Domain Scientific Discovery",
+  "execution_date": "2026-03-28",
+  "original_idea": "A better test-time computation method for open-domain scientific discovery tasks",
+  "selected_idea": "EPISTEMIC-PRM: Process Reward Models with Explicit Uncertainty Typing",
+  "pricing": {
+    "gemini_pro": {
+      "input_per_1k": 0.0015,
+      "output_per_1k": 0.006,
+      "currency": "USD"
+    },
+    "kimi_k2_5": {
+      "input_per_1k": 0.0005,
+      "output_per_1k": 0.001,
+      "currency": "USD"
+    }
+  },
+  "phases": [
+    {
+      "phase": "Gemini Deep Research (Survey)",
+      "api": "Gemini Pro",
+      "model": "deep-research-pro-preview-12-2025",
+      "timing": {
+        "start_time": "2026-03-28T21:25:36.418656",
+        "end_time": "2026-03-28T21:31:55.758160",
+        "duration_seconds": 379.34,
+        "duration_minutes": 6.32
+      },
+      "tokens": {
+        "input": 299,
+        "output": 7859,
+        "total": 8158,
+        "note": "Estimated (~4 chars/token)"
+      },
+      "cost": {
+        "input_usd": 0.0004,
+        "output_usd": 0.0472,
+        "total_usd": 0.0476
+      }
+    },
+    {
+      "phase": "Auto Research",
+      "api": "Kimi (Moonshot)",
+      "model": "kimi-k2.5",
+      "timing": {
+        "start_time": "2026-03-28T21:34:32.082102",
+        "end_time": "2026-03-28T21:35:58.118567",
+        "duration_seconds": 86.04,
+        "duration_minutes": 1.43
+      },
+      "tokens": {
+        "input": 3881,
+        "output": 3428,
+        "total": 7309,
+        "note": "Estimated (~4 chars/token)"
+      },
+      "cost": {
+        "input_usd": 0.0019,
+        "output_usd": 0.0034,
+        "total_usd": 0.0054
+      }
+    },
+    {
+      "phase": "Idea Generation",
+      "api": "Kimi (Moonshot)",
+      "model": "kimi-k2.5",
+      "timing": {
+        "start_time": "2026-03-28T21:35:58.119670",
+        "end_time": "2026-03-28T21:37:08.900514",
+        "duration_seconds": 70.78,
+        "duration_minutes": 1.18
+      },
+      "tokens": {
+        "input": 3982,
+        "output": 3114,
+        "total": 7096,
+        "note": "Estimated (~4 chars/token)"
+      },
+      "cost": {
+        "input_usd": 0.0020,
+        "output_usd": 0.0031,
+        "total_usd": 0.0051
+      }
+    },
+    {
+      "phase": "Idea Selection",
+      "api": "Kimi (Moonshot)",
+      "model": "kimi-k2.5",
+      "timing": {
+        "start_time": "2026-03-28T21:37:08.902231",
+        "end_time": "2026-03-28T21:38:06.662234",
+        "duration_seconds": 57.76,
+        "duration_minutes": 0.96
+      },
+      "tokens": {
+        "input": 3221,
+        "output": 2178,
+        "total": 5399,
+        "note": "Estimated (~4 chars/token)"
+      },
+      "cost": {
+        "input_usd": 0.0016,
+        "output_usd": 0.0022,
+        "total_usd": 0.0038
+      }
+    }
+  ],
+  "summary": {
+    "total_time": {
+      "minutes": 9.89,
+      "seconds": 593.92
+    },
+    "total_tokens": {
+      "input": 11383,
+      "output": 16579,
+      "total": 27962
+    },
+    "total_cost_usd": 0.0619,
+    "by_api": {
+      "gemini_pro": {
+        "input_tokens": 299,
+        "output_tokens": 7859,
+        "total_tokens": 8158,
+        "cost_usd": 0.0476,
+        "time_minutes": 6.32
+      },
+      "kimi_k2_5": {
+        "input_tokens": 11084,
+        "output_tokens": 8720,
+        "total_tokens": 19804,
+        "cost_usd": 0.0143,
+        "time_minutes": 3.57
+      }
+    }
+  }
+}

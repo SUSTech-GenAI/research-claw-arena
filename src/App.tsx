@@ -32,84 +32,91 @@ type RoundId =
   | 'writing-round-1'
   | 'plotting-round-1';
 type RoundStatus = 'ready' | 'comingSoon';
+type ScoreValue = number | null;
+type ChartDatum = {
+  subject: string;
+  arenaId?: ArenaId;
+} & Record<string, string | number | undefined>;
 
 const LOCALE_STORAGE_KEY = 'research-claw-arena-locale';
 const LOCALE_QUERY_KEY = 'lang';
 
 const CLAWS = [
   {
-    id: 'claw-claude3',
-    name: 'Claw-Claude-3',
-    version: 'Opus',
-    color: '#8b5cf6',
+    id: 'auto-research-claw',
+    name: 'AutoResearchClaw',
+    version: 'Round 1',
+    color: '#2563eb',
+    overall: 79,
     scores: {
-      idea: 95,
-      writing: 98,
-      plotting: 80,
-      experiment: 82,
-      tokenEff: 75,
-      timeEff: 70,
-      completion: 95,
-      quality: 96,
+      idea: 74,
+      writing: null,
+      plotting: null,
+      experiment: null,
+      tokenEff: 100,
+      timeEff: 82,
+      completion: 82,
+      quality: 66,
     },
   },
   {
-    id: 'claw-gpt4',
-    name: 'Claw-GPT-4',
-    version: 'Turbo',
-    color: '#10b981',
+    id: 'dr-claw',
+    name: 'Dr. Claw',
+    version: 'Round 1',
+    color: '#0f766e',
+    overall: 78,
     scores: {
-      idea: 92,
-      writing: 95,
-      plotting: 88,
-      experiment: 85,
-      tokenEff: 70,
-      timeEff: 65,
-      completion: 98,
-      quality: 94,
+      idea: 73,
+      writing: null,
+      plotting: null,
+      experiment: null,
+      tokenEff: 78,
+      timeEff: 100,
+      completion: 63,
+      quality: 82,
     },
   },
   {
-    id: 'claw-gemini15',
-    name: 'Claw-Gemini-1.5',
-    version: 'Pro',
-    color: '#3b82f6',
+    id: 'ai-scientist-v2',
+    name: 'AI-SCIENTIST-V2',
+    version: 'Round 1',
+    color: '#dc2626',
+    overall: 64,
     scores: {
-      idea: 90,
-      writing: 92,
-      plotting: 85,
-      experiment: 90,
-      tokenEff: 85,
-      timeEff: 88,
-      completion: 92,
-      quality: 90,
-    },
-  },
-  {
-    id: 'claw-llama3',
-    name: 'Claw-Llama-3',
-    version: '70B',
-    color: '#f59e0b',
-    scores: {
-      idea: 85,
-      writing: 88,
-      plotting: 70,
-      experiment: 75,
-      tokenEff: 95,
-      timeEff: 92,
-      completion: 88,
-      quality: 85,
+      idea: 57,
+      writing: null,
+      plotting: null,
+      experiment: null,
+      tokenEff: 72,
+      timeEff: 91,
+      completion: 47,
+      quality: 67,
     },
   },
 ];
 
+function averageScores(scores: ScoreValue[]) {
+  const definedScores = scores.filter((score): score is number => score !== null);
+  if (definedScores.length === 0) {
+    return 0;
+  }
+  return Math.round(definedScores.reduce((sum, score) => sum + score, 0) / definedScores.length);
+}
+
 const clawsWithOverall = CLAWS.map((claw) => {
-  const capabilityAvg =
-    (claw.scores.idea + claw.scores.writing + claw.scores.plotting + claw.scores.experiment) / 4;
-  const performanceAvg =
-    (claw.scores.tokenEff + claw.scores.timeEff + claw.scores.completion + claw.scores.quality) / 4;
-  const overall = Math.round((capabilityAvg + performanceAvg) / 2);
-  return {...claw, overall, capabilityAvg, performanceAvg};
+  const capabilityAvg = averageScores([
+    claw.scores.idea,
+    claw.scores.writing,
+    claw.scores.plotting,
+    claw.scores.experiment,
+  ]);
+  const performanceAvg = averageScores([
+    claw.scores.tokenEff,
+    claw.scores.timeEff,
+    claw.scores.completion,
+    claw.scores.quality,
+  ]);
+  return {...claw, capabilityAvg, performanceAvg};
 }).sort((a, b) => b.overall - a.overall);
 
 const translations = {
@@ -133,45 +140,45 @@ const translations = {
         description: 'Arena tracks and round selection',
       },
     },
-    leaderboards: {
-      badge: 'Leaderboards',
-      title: 'Evaluating Research Agents',
-      intro:
-        'This page gives an overview of the current Research Claw benchmark. It includes the leaderboard, the main comparison charts, and a detailed breakdown for each model.',
+      leaderboards: {
+        badge: 'Leaderboards',
+        title: 'Evaluating Research Agents',
+        intro: '',
       capabilityDimension: 'Capability Dimension',
       performanceDimension: 'Performance Dimension',
       leaderboardTitle: 'Arena Leaderboard',
       scoresOutOfHundred: 'Scores out of 100',
-      table: {
-        rank: 'Rank',
-        model: 'Model',
-        overall: 'Overall',
-        capabilities: 'Capabilities',
-        performance: 'Performance',
-        idea: 'Idea',
-        writing: 'Write',
-        plotting: 'Plot',
-        experiment: 'Exp',
-        tokens: 'Tokens',
-        time: 'Time',
-        completion: 'Comp',
-        quality: 'Qual',
-      },
+        table: {
+          rank: 'Rank',
+          model: 'Model',
+          overall: 'Overall',
+          capabilities: 'Capabilities',
+          performance: 'Performance',
+          idea: 'Idea',
+          writing: 'Write',
+          plotting: 'Plot',
+          experiment: 'Exp',
+          tokens: 'Tokens',
+          time: 'Time',
+          completion: 'Oper',
+          quality: 'Value',
+        },
       comparisonTitle: 'Visual Comparison',
-      charts: {
-        capabilityTitle: 'Capability Scope',
-        performanceTitle: 'Performance Metrics',
-        capabilitySubjects: {
-          idea: 'Idea Gen',
-          writing: 'Writing',
-          plotting: 'Plotting',
-          experiment: 'Experiment',
+        charts: {
+          capabilityTitle: 'Capability Scope',
+          performanceTitle: 'Performance Metrics',
+          pendingMetrics: 'Metrics for this track are not published yet.',
+          capabilitySubjects: {
+            idea: 'Idea Gen',
+            writing: 'Writing',
+            plotting: 'Plotting',
+            experiment: 'Experiment',
         },
         performanceSubjects: {
           tokens: 'Token Eff',
           time: 'Time Eff',
-          completion: 'Completion',
-          quality: 'Quality',
+          completion: 'Operability',
+          quality: 'Research Value',
         },
       },
       profilesTitle: 'Detailed Profiles',
@@ -187,15 +194,15 @@ const translations = {
         experiment: 'Experiment',
         tokens: 'Tokens',
         time: 'Time',
-        completion: 'Completion',
-        quality: 'Quality',
+        completion: 'Operability',
+        quality: 'Research Value',
       },
     },
     arena: {
       badge: 'Arena',
       title: 'Arena Tracks',
       intro:
-        'Switch between arena tracks and browse the published rounds for each track. The Chinese version shares the same structure and interactions as the English version.',
+        'Browse the benchmark by track and review the active rounds, task framing, and participating systems for each evaluation area.',
       tracksTitle: 'Competition Tracks',
       enterTrack: 'Enter track',
       statuses: {
@@ -207,24 +214,24 @@ const translations = {
       roundPickerTitle: 'Select a comparison round',
       roundDetailsTitle: 'Round Details',
       participants: 'Participants',
-      participantCount: '4 claws',
+      participantCount: '3 claws',
     },
     arenaCards: {
       idea: {
         title: 'Idea Generation',
-        blurb: 'Compare prompt ideation rounds and select a benchmark round for direct model matchups.',
+        blurb: 'Explore the idea generation track and compare how the current systems perform on open-ended research ideation tasks.',
       },
       experiment: {
         title: 'Experiment',
-        blurb: 'Browse experiment design rounds and keep the track structure ready for future benchmark releases.',
+        blurb: 'Review experiment design rounds focused on methodology, evaluation setup, and ablation planning across research workflows.',
       },
       writing: {
         title: 'Writing',
-        blurb: 'Track writing-focused rounds for drafting, revision, and structured research communication.',
+        blurb: 'Review writing rounds centered on drafting quality, revision strategy, and structured research communication.',
       },
       plotting: {
         title: 'Plotting',
-        blurb: 'Reserve figure and plotting rounds for future visualization-heavy comparisons.',
+        blurb: 'Review plotting rounds centered on figure design, visual reasoning, and research-facing data presentation.',
       },
     },
     rounds: {
@@ -232,50 +239,49 @@ const translations = {
         {
           id: 'idea-round-1' as const,
           label: 'Round 1',
-          subtitle: 'First Round',
-          prompt: 'Baseline ideation prompts with the current four research claws.',
+          subtitle: 'Published',
+          prompt: 'topic: A better test-time computation method for open-domain scientific discovery tasks.',
           status: 'ready' as const,
-          details:
-            'This round compares first-pass research idea generation quality, novelty, and actionability across the current four claws.',
+          details: '',
         },
       ],
       experiment: [
         {
           id: 'experiment-round-1' as const,
           label: 'Round 1',
-          subtitle: 'Coming Soon',
-          prompt: 'Experiment protocol comparisons will be added here when the benchmark rubric is finalized.',
-          status: 'comingSoon' as const,
+          subtitle: 'Core Track',
+          prompt: 'Design a rigorous experimental plan that can evaluate a proposed research idea under realistic constraints.',
+          status: 'ready' as const,
           details:
-            'This track is reserved for experimental design, ablation planning, and methodology comparison rounds.',
+            'This track focuses on experimental framing, control design, ablation structure, and methodology comparison for research-facing systems.',
         },
       ],
       writing: [
         {
           id: 'writing-round-1' as const,
           label: 'Round 1',
-          subtitle: 'Coming Soon',
-          prompt: 'Writing evaluation rounds will appear here after the shared drafting templates are locked.',
-          status: 'comingSoon' as const,
+          subtitle: 'Core Track',
+          prompt: 'Produce a clear, well-structured research write-up that balances technical precision with readability.',
+          status: 'ready' as const,
           details:
-            'This track will focus on technical writing clarity, structure, and revision quality for research outputs.',
+            'This track focuses on drafting quality, revision judgment, structural clarity, and the communication of technical research content.',
         },
       ],
       plotting: [
         {
           id: 'plotting-round-1' as const,
           label: 'Round 1',
-          subtitle: 'Coming Soon',
-          prompt: 'Plotting rounds will cover chart design, visual reasoning, and figure communication once published.',
-          status: 'comingSoon' as const,
+          subtitle: 'Core Track',
+          prompt: 'Design figures and plots that communicate research findings clearly, accurately, and with strong visual judgment.',
+          status: 'ready' as const,
           details:
-            'This track is for figure planning, plotting choices, and chart storytelling under research constraints.',
+            'This track focuses on chart selection, figure composition, visual explanation, and the presentation of evidence in research outputs.',
         },
       ],
     },
     footer: {
       builtForPages: 'Built for GitHub Pages.',
-      note: 'Metrics are simulated for demonstration purposes.',
+      note: 'This site reflects the current Research Claw benchmark release.',
     },
   },
   'zh-CN': {
@@ -298,45 +304,45 @@ const translations = {
         description: '竞技场赛道与回合选择',
       },
     },
-    leaderboards: {
-      badge: '排行榜',
-      title: '研究智能体评测',
-      intro:
-        '这个页面用于概览当前的 Research Claw benchmark，包括排行榜、主要对比图表，以及每个模型的详细拆解。',
+      leaderboards: {
+        badge: '排行榜',
+        title: '研究智能体评测',
+        intro: '',
       capabilityDimension: '能力维度',
       performanceDimension: '性能维度',
       leaderboardTitle: '竞技场排行榜',
       scoresOutOfHundred: '评分满分 100',
-      table: {
-        rank: '排名',
-        model: '模型',
-        overall: '总分',
-        capabilities: '能力',
-        performance: '性能',
-        idea: '创意',
-        writing: '写作',
-        plotting: '绘图',
-        experiment: '实验',
-        tokens: 'Token',
-        time: '时间',
-        completion: '完成',
-        quality: '质量',
-      },
-      comparisonTitle: '可视化对比',
-      charts: {
-        capabilityTitle: '能力范围',
-        performanceTitle: '性能指标',
-        capabilitySubjects: {
-          idea: '创意生成',
+        table: {
+          rank: '排名',
+          model: '模型',
+          overall: '总分',
+          capabilities: '能力',
+          performance: '性能',
+          idea: '创意',
           writing: '写作',
           plotting: '绘图',
           experiment: '实验',
+          tokens: 'Token',
+          time: '时间',
+          completion: '可操作',
+          quality: '研究价值',
+        },
+      comparisonTitle: '可视化对比',
+        charts: {
+          capabilityTitle: '能力范围',
+          performanceTitle: '性能指标',
+          pendingMetrics: '该赛道的性能指标暂未发布。',
+          capabilitySubjects: {
+            idea: '创意生成',
+            writing: '写作',
+            plotting: '绘图',
+            experiment: '实验',
         },
         performanceSubjects: {
           tokens: 'Token 效率',
           time: '时间效率',
-          completion: '完成率',
-          quality: '质量',
+          completion: '可操作性',
+          quality: '研究价值',
         },
       },
       profilesTitle: '详细画像',
@@ -352,15 +358,15 @@ const translations = {
         experiment: '实验',
         tokens: 'Token',
         time: '时间',
-        completion: '完成',
-        quality: '质量',
+        completion: '可操作性',
+        quality: '研究价值',
       },
     },
     arena: {
       badge: '竞技场',
       title: '竞技场赛道',
       intro:
-        '你可以在不同竞技场赛道之间切换，并查看每条赛道已经发布的 round。中文版和英文版使用同一套页面结构与交互逻辑。',
+        '你可以按赛道浏览 benchmark 内容，并查看各赛道当前 round 的任务定义、对比重点和参赛系统。',
       tracksTitle: '赛道列表',
       enterTrack: '进入赛道',
       statuses: {
@@ -372,24 +378,24 @@ const translations = {
       roundPickerTitle: '选择对比回合',
       roundDetailsTitle: '回合详情',
       participants: '参赛 Claws',
-      participantCount: '4 个 Claws',
+      participantCount: '3 个 Claws',
     },
     arenaCards: {
       idea: {
         title: '创意生成',
-        blurb: '查看创意生成相关的对比回合，并为模型对战选择具体 benchmark round。',
+        blurb: '浏览创意生成赛道，查看当前系统在开放式研究想法生成任务中的表现与对比结果。',
       },
       experiment: {
         title: '实验设计',
-        blurb: '浏览实验设计赛道的回合结构，为后续评测内容预留好入口。',
+        blurb: '浏览实验设计赛道，查看围绕方法设计、评测方案和消融规划展开的对比内容。',
       },
       writing: {
         title: '写作',
-        blurb: '跟踪写作赛道中的草稿、修订和科研表达类回合。',
+        blurb: '浏览写作赛道，查看围绕草稿生成、修订判断和科研表达展开的对比内容。',
       },
       plotting: {
         title: '绘图',
-        blurb: '为未来偏可视化的图表与绘图对比预留赛道与回合结构。',
+        blurb: '浏览绘图赛道，查看围绕图表设计、视觉推理和科研可视化表达展开的对比内容。',
       },
     },
     rounds: {
@@ -397,46 +403,46 @@ const translations = {
         {
           id: 'idea-round-1' as const,
           label: 'Round 1',
-          subtitle: '第一回合',
-          prompt: '当前四个 Research Claw 的基础创意生成题组。',
+          subtitle: '已发布',
+          prompt: 'topic: A better test-time computation method for open-domain scientific discovery tasks.',
           status: 'ready' as const,
-          details: '这一回合主要比较四个 Claw 在研究想法生成上的新颖性、可执行性和首轮输出质量。',
+          details: '',
         },
       ],
       experiment: [
         {
           id: 'experiment-round-1' as const,
           label: 'Round 1',
-          subtitle: '即将上线',
-          prompt: '实验设计赛道的回合内容会在 benchmark 规则确定后补充到这里。',
-          status: 'comingSoon' as const,
-          details: '该赛道将聚焦实验方案设计、消融规划和方法学对比。',
+          subtitle: '核心赛道',
+          prompt: '设计一套在真实约束下可执行的实验方案，用于评估某个研究想法的有效性。',
+          status: 'ready' as const,
+          details: '该赛道聚焦实验框架设计、对照设置、消融结构与研究方法比较。',
         },
       ],
       writing: [
         {
           id: 'writing-round-1' as const,
           label: 'Round 1',
-          subtitle: '即将上线',
-          prompt: '写作赛道的回合会在统一写作模板敲定之后发布。',
-          status: 'comingSoon' as const,
-          details: '该赛道将关注科研写作的清晰度、结构和修订质量。',
+          subtitle: '核心赛道',
+          prompt: '产出一份结构清晰、表达准确且兼顾可读性的研究写作内容。',
+          status: 'ready' as const,
+          details: '该赛道聚焦草稿质量、修订判断、结构组织与科研技术内容的表达能力。',
         },
       ],
       plotting: [
         {
           id: 'plotting-round-1' as const,
           label: 'Round 1',
-          subtitle: '即将上线',
-          prompt: '绘图赛道会在相关任务正式发布后补充图表设计与可视化表达回合。',
-          status: 'comingSoon' as const,
-          details: '该赛道将覆盖图形规划、绘图选择以及科研图表叙事能力。',
+          subtitle: '核心赛道',
+          prompt: '设计能够准确传达研究结果的图表与可视化方案，兼顾信息密度与表达质量。',
+          status: 'ready' as const,
+          details: '该赛道聚焦图表类型选择、图形结构设计、视觉表达判断与科研证据呈现能力。',
         },
       ],
     },
     footer: {
       builtForPages: '已部署到 GitHub Pages。',
-      note: '当前指标为演示数据。',
+      note: '本页面展示当前版本的 Research Claw benchmark 发布内容。',
     },
   },
 } as const;
@@ -485,66 +491,50 @@ function buildCapabilityData(text: (typeof translations)[Locale]) {
   return [
     {
       subject: text.leaderboards.charts.capabilitySubjects.idea,
-      'Claw-Claude-3': 95,
-      'Claw-GPT-4': 92,
-      'Claw-Gemini-1.5': 90,
-      'Claw-Llama-3': 85,
+      arenaId: 'idea' as const,
+      ...Object.fromEntries(clawsWithOverall.map((claw) => [claw.name, claw.scores.idea ?? 0])),
     },
     {
       subject: text.leaderboards.charts.capabilitySubjects.writing,
-      'Claw-Claude-3': 98,
-      'Claw-GPT-4': 95,
-      'Claw-Gemini-1.5': 92,
-      'Claw-Llama-3': 88,
+      arenaId: 'writing' as const,
+      ...Object.fromEntries(clawsWithOverall.map((claw) => [claw.name, claw.scores.writing ?? 0])),
     },
     {
       subject: text.leaderboards.charts.capabilitySubjects.plotting,
-      'Claw-Claude-3': 80,
-      'Claw-GPT-4': 88,
-      'Claw-Gemini-1.5': 85,
-      'Claw-Llama-3': 70,
+      arenaId: 'plotting' as const,
+      ...Object.fromEntries(clawsWithOverall.map((claw) => [claw.name, claw.scores.plotting ?? 0])),
     },
     {
       subject: text.leaderboards.charts.capabilitySubjects.experiment,
-      'Claw-Claude-3': 82,
-      'Claw-GPT-4': 85,
-      'Claw-Gemini-1.5': 90,
-      'Claw-Llama-3': 75,
+      arenaId: 'experiment' as const,
+      ...Object.fromEntries(clawsWithOverall.map((claw) => [claw.name, claw.scores.experiment ?? 0])),
     },
-  ];
+  ] satisfies ChartDatum[];
 }
 
-function buildPerformanceData(text: (typeof translations)[Locale]) {
+function buildPerformanceData(text: (typeof translations)[Locale], activeCapability: ArenaId) {
+  if (activeCapability !== 'idea') {
+    return [] satisfies ChartDatum[];
+  }
+
   return [
     {
       subject: text.leaderboards.charts.performanceSubjects.tokens,
-      'Claw-Claude-3': 75,
-      'Claw-GPT-4': 70,
-      'Claw-Gemini-1.5': 85,
-      'Claw-Llama-3': 95,
+      ...Object.fromEntries(clawsWithOverall.map((claw) => [claw.name, claw.scores.tokenEff])),
     },
     {
       subject: text.leaderboards.charts.performanceSubjects.time,
-      'Claw-Claude-3': 70,
-      'Claw-GPT-4': 65,
-      'Claw-Gemini-1.5': 88,
-      'Claw-Llama-3': 92,
+      ...Object.fromEntries(clawsWithOverall.map((claw) => [claw.name, claw.scores.timeEff])),
     },
     {
       subject: text.leaderboards.charts.performanceSubjects.completion,
-      'Claw-Claude-3': 95,
-      'Claw-GPT-4': 98,
-      'Claw-Gemini-1.5': 92,
-      'Claw-Llama-3': 88,
+      ...Object.fromEntries(clawsWithOverall.map((claw) => [claw.name, claw.scores.completion])),
     },
     {
       subject: text.leaderboards.charts.performanceSubjects.quality,
-      'Claw-Claude-3': 96,
-      'Claw-GPT-4': 94,
-      'Claw-Gemini-1.5': 90,
-      'Claw-Llama-3': 85,
+      ...Object.fromEntries(clawsWithOverall.map((claw) => [claw.name, claw.scores.quality])),
     },
-  ];
+  ] satisfies ChartDatum[];
 }
 
 function buildPages(text: (typeof translations)[Locale]) {
@@ -580,7 +570,7 @@ function buildArenaCards(text: (typeof translations)[Locale]) {
       blurb: text.arenaCards.experiment.blurb,
       accent: 'bg-emerald-50 text-emerald-700 border-emerald-100',
       icon: FlaskConical,
-      status: 'comingSoon' as const,
+      status: 'available' as const,
     },
     {
       id: 'writing' as const,
@@ -588,7 +578,7 @@ function buildArenaCards(text: (typeof translations)[Locale]) {
       blurb: text.arenaCards.writing.blurb,
       accent: 'bg-amber-50 text-amber-700 border-amber-100',
       icon: PenTool,
-      status: 'comingSoon' as const,
+      status: 'available' as const,
     },
     {
       id: 'plotting' as const,
@@ -596,7 +586,7 @@ function buildArenaCards(text: (typeof translations)[Locale]) {
       blurb: text.arenaCards.plotting.blurb,
       accent: 'bg-violet-50 text-violet-700 border-violet-100',
       icon: ImageIcon,
-      status: 'comingSoon' as const,
+      status: 'available' as const,
     },
   ];
 }
@@ -605,10 +595,15 @@ function buildArenaRounds(text: (typeof translations)[Locale]) {
   return text.rounds;
 }
 
+function getArenaLabel(text: (typeof translations)[Locale], arena: ArenaId) {
+  return text.arenaCards[arena].title;
+}
+
 export default function App() {
   const [locale, setLocale] = useState<Locale>(() => getInitialLocale());
   const [activePage, setActivePage] = useState<PageId>('leaderboards');
   const [selectedClaws, setSelectedClaws] = useState<string[]>(clawsWithOverall.slice(0, 3).map((claw) => claw.id));
+  const [activeCapability, setActiveCapability] = useState<ArenaId>('idea');
   const [activeArena, setActiveArena] = useState<ArenaId>('idea');
   const [activeRound, setActiveRound] = useState<RoundId>('idea-round-1');
 
@@ -617,7 +612,7 @@ export default function App() {
   const arenaCards = buildArenaCards(text);
   const arenaRounds = buildArenaRounds(text);
   const capabilityData = buildCapabilityData(text);
-  const performanceData = buildPerformanceData(text);
+  const performanceData = buildPerformanceData(text, activeCapability);
   const pageMeta = pages.find((page) => page.id === activePage)!;
 
   useEffect(() => {
@@ -632,7 +627,7 @@ export default function App() {
       return;
     }
 
-    if (selectedClaws.length < 4) {
+    if (selectedClaws.length < CLAWS.length) {
       setSelectedClaws([...selectedClaws, id]);
     }
   };
@@ -736,6 +731,9 @@ export default function App() {
               performanceData={performanceData}
               selectedClaws={selectedClaws}
               onToggleClaw={toggleClaw}
+              activeCapability={activeCapability}
+              onSelectCapability={setActiveCapability}
+              activeCapabilityLabel={getArenaLabel(text, activeCapability)}
             />
           ) : (
             <ArenaPage
@@ -766,18 +764,28 @@ export default function App() {
   );
 }
 
+function renderScore(score: ScoreValue) {
+  return score === null ? '/' : score;
+}
+
 function LeaderboardsPage({
   text,
   capabilityData,
   performanceData,
   selectedClaws,
   onToggleClaw,
+  activeCapability,
+  onSelectCapability,
+  activeCapabilityLabel,
 }: {
   text: (typeof translations)[Locale];
-  capabilityData: Array<Record<string, string | number>>;
-  performanceData: Array<Record<string, string | number>>;
+  capabilityData: ChartDatum[];
+  performanceData: ChartDatum[];
   selectedClaws: string[];
   onToggleClaw: (id: string) => void;
+  activeCapability: ArenaId;
+  onSelectCapability: (arena: ArenaId) => void;
+  activeCapabilityLabel: string;
 }) {
   return (
     <>
@@ -885,11 +893,11 @@ function LeaderboardsPage({
                     <td className="whitespace-nowrap bg-blue-50/30 px-6 py-4 text-center">
                       <span className="text-base font-bold text-blue-700">{claw.overall}</span>
                     </td>
-                    <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.idea}</td>
-                    <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.writing}</td>
-                    <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.plotting}</td>
+                    <td className="px-2 py-4 text-center font-mono text-neutral-600">{renderScore(claw.scores.idea)}</td>
+                    <td className="px-2 py-4 text-center font-mono text-neutral-600">{renderScore(claw.scores.writing)}</td>
+                    <td className="px-2 py-4 text-center font-mono text-neutral-600">{renderScore(claw.scores.plotting)}</td>
                     <td className="border-r border-neutral-100 px-2 py-4 text-center font-mono text-neutral-600">
-                      {claw.scores.experiment}
+                      {renderScore(claw.scores.experiment)}
                     </td>
                     <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.tokenEff}</td>
                     <td className="px-2 py-4 text-center font-mono text-neutral-600">{claw.scores.timeEff}</td>
@@ -936,45 +944,62 @@ function LeaderboardsPage({
             icon={<Lightbulb size={18} className="text-blue-500" />}
             data={capabilityData}
             selectedClaws={selectedClaws}
+            activeCapability={activeCapability}
+            onSubjectClick={onSelectCapability}
           />
           <ChartCard
             title={text.leaderboards.charts.performanceTitle}
             icon={<Zap size={18} className="text-emerald-500" />}
             data={performanceData}
             selectedClaws={selectedClaws}
+            activeCapability={activeCapability}
+            activeCapabilityLabel={activeCapabilityLabel}
+            emptyMessage={text.leaderboards.charts.pendingMetrics}
           />
         </div>
       </section>
 
       <section>
         <h3 className="mb-4 text-lg font-bold">{text.leaderboards.profilesTitle}</h3>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-3">
           {clawsWithOverall.map((claw) => (
-            <div key={claw.id} className="flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
-              <div className="border-b border-neutral-100 p-5" style={{borderTop: `4px solid ${claw.color}`}}>
-                <div className="mb-2 flex items-start justify-between">
-                  <h4 className="text-lg font-bold">{claw.name}</h4>
-                  <span className="rounded-md bg-neutral-100 px-2 py-1 text-xs font-medium text-neutral-600">
-                    {claw.version}
-                  </span>
-                </div>
-                <div className="mt-4 flex items-end gap-2">
-                  <span className="text-3xl font-bold leading-none" style={{color: claw.color}}>
-                    {claw.overall}
-                  </span>
-                  <span className="mb-1 text-sm font-medium text-neutral-500">
-                    {text.leaderboards.profileSections.overallScore}
-                  </span>
+            <div
+              key={claw.id}
+              className="flex min-w-0 flex-col overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm"
+            >
+              <div className="border-b border-neutral-100 p-5 sm:p-6" style={{borderTop: `4px solid ${claw.color}`}}>
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-3">
+                    <span className="self-start rounded-full bg-neutral-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+                      {claw.version}
+                    </span>
+                    <div className="min-w-0">
+                      <h4 className="break-words text-xl font-bold leading-tight tracking-tight text-neutral-900 sm:text-2xl">
+                        {claw.name}
+                      </h4>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-neutral-100 bg-neutral-50 px-4 py-4">
+                    <div className="flex items-end gap-3">
+                      <span className="text-5xl font-bold leading-none" style={{color: claw.color}}>
+                        {claw.overall}
+                      </span>
+                      <span className="pb-1 text-sm font-semibold text-neutral-500">
+                        {text.leaderboards.profileSections.overallScore}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex-1 bg-neutral-50/50 p-5">
-                <div className="space-y-4">
-                  <div>
-                    <h5 className="mb-3 text-xs font-bold uppercase tracking-wider text-neutral-400">
+              <div className="flex-1 bg-neutral-50/60 p-5 sm:p-6">
+                <div className="space-y-5">
+                  <div className="rounded-2xl border border-neutral-100 bg-white p-4">
+                    <h5 className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-neutral-400">
                       {text.leaderboards.profileSections.capabilities}
                     </h5>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <ScoreBar
                         label={text.leaderboards.scoreLabels.idea}
                         score={claw.scores.idea}
@@ -1002,11 +1027,11 @@ function LeaderboardsPage({
                     </div>
                   </div>
 
-                  <div className="pt-2">
-                    <h5 className="mb-3 text-xs font-bold uppercase tracking-wider text-neutral-400">
+                  <div className="rounded-2xl border border-neutral-100 bg-white p-4">
+                    <h5 className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-neutral-400">
                       {text.leaderboards.profileSections.performance}
                     </h5>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <ScoreBar
                         label={text.leaderboards.scoreLabels.tokens}
                         score={claw.scores.tokenEff}
@@ -1218,11 +1243,19 @@ function ChartCard({
   icon,
   data,
   selectedClaws,
+  activeCapability,
+  activeCapabilityLabel,
+  onSubjectClick,
+  emptyMessage,
 }: {
   title: string;
   icon: ReactNode;
-  data: Array<Record<string, string | number>>;
+  data: ChartDatum[];
   selectedClaws: string[];
+  activeCapability: ArenaId;
+  activeCapabilityLabel?: string;
+  onSubjectClick?: (arena: ArenaId) => void;
+  emptyMessage?: string;
 }) {
   return (
     <div className="flex flex-col items-center rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
@@ -1231,35 +1264,101 @@ function ChartCard({
         {title}
       </h4>
       <div className="h-[300px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
-            <PolarGrid stroke="#e5e5e5" />
-            <PolarAngleAxis dataKey="subject" tick={{fill: '#525252', fontSize: 12}} />
-            <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{fill: '#a3a3a3', fontSize: 10}} />
-            <Tooltip
-              contentStyle={{
-                borderRadius: '8px',
-                border: '1px solid #e5e5e5',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-              }}
-            />
-            <Legend wrapperStyle={{fontSize: '12px', paddingTop: '20px'}} />
-            {clawsWithOverall
-              .filter((claw) => selectedClaws.includes(claw.id))
-              .map((claw) => (
-                <Radar
-                  key={claw.id}
-                  name={claw.name}
-                  dataKey={claw.name}
-                  stroke={claw.color}
-                  fill={claw.color}
-                  fillOpacity={0.2}
-                />
-              ))}
-          </RadarChart>
-        </ResponsiveContainer>
+        {data.length === 0 ? (
+          <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-neutral-200 bg-neutral-50/70 text-center text-sm leading-relaxed text-neutral-400">
+            <div>
+              <div className="font-medium text-neutral-500">{activeCapabilityLabel}</div>
+              <div className="mt-2">{emptyMessage}</div>
+            </div>
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
+              <PolarGrid stroke="#e5e5e5" />
+              <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{fill: '#a3a3a3', fontSize: 10}} />
+              <Tooltip
+                contentStyle={{
+                  borderRadius: '8px',
+                  border: '1px solid #e5e5e5',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                }}
+              />
+              <Legend wrapperStyle={{fontSize: '12px', paddingTop: '20px'}} />
+              {clawsWithOverall
+                .filter((claw) => selectedClaws.includes(claw.id))
+                .map((claw) => (
+                  <Radar
+                    key={claw.id}
+                    name={claw.name}
+                    dataKey={claw.name}
+                    stroke={claw.color}
+                    fill={claw.color}
+                    fillOpacity={0.2}
+                  />
+                ))}
+              <PolarAngleAxis
+                dataKey="subject"
+                tick={(tickProps) => (
+                  <CapabilityAxisTick
+                    {...tickProps}
+                    activeCapability={activeCapability}
+                    subjectArenaMap={Object.fromEntries(
+                      data
+                        .filter((item) => item.arenaId)
+                        .map((item) => [item.subject, item.arenaId])
+                    )}
+                    onSubjectClick={onSubjectClick}
+                  />
+                )}
+              />
+            </RadarChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
+  );
+}
+
+function CapabilityAxisTick({
+  x,
+  y,
+  payload,
+  activeCapability,
+  subjectArenaMap,
+  onSubjectClick,
+}: {
+  x?: number;
+  y?: number;
+  payload?: {
+    value?: string;
+  };
+  activeCapability?: ArenaId;
+  subjectArenaMap: Record<string, ArenaId>;
+  onSubjectClick?: (arena: ArenaId) => void;
+}) {
+  const arenaId = payload?.value ? subjectArenaMap[payload.value] : undefined;
+  const isActive = !!arenaId && arenaId === activeCapability;
+
+  return (
+    <text
+      x={x}
+      y={y}
+      dy={4}
+      fill={isActive ? '#2563eb' : '#525252'}
+      fontSize={12}
+      fontWeight={isActive ? 700 : 400}
+      textAnchor="middle"
+      data-testid={arenaId ? `capability-axis-${arenaId}` : undefined}
+      pointerEvents="all"
+      style={{cursor: arenaId && onSubjectClick ? 'pointer' : 'default'}}
+      onClick={() => {
+        if (arenaId && onSubjectClick) {
+          onSubjectClick(arenaId);
+        }
+      }}
+    >
+      {payload?.value}
+    </text>
   );
 }
 
@@ -1270,20 +1369,25 @@ function ScoreBar({
   color,
 }: {
   label: string;
-  score: number;
+  score: ScoreValue;
   icon: ReactNode;
   color: string;
 }) {
   return (
-    <div className="flex items-center gap-3 text-sm">
-      <div className="flex w-24 items-center gap-1.5 text-neutral-600">
-        <span className="text-neutral-400">{icon}</span>
-        <span className="truncate">{label}</span>
+    <div className="rounded-2xl border border-neutral-100 bg-neutral-50/80 px-3 py-3 text-sm">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2 text-neutral-700">
+          <span className="text-neutral-400">{icon}</span>
+          <span className="truncate font-medium">{label}</span>
+        </div>
+        <div className="text-right font-mono text-xs font-semibold text-neutral-700">{renderScore(score)}</div>
       </div>
-      <div className="h-2 flex-1 overflow-hidden rounded-full bg-neutral-200">
-        <div className="h-full rounded-full transition-all duration-500 ease-out" style={{width: `${score}%`, backgroundColor: color}} />
+      <div className="h-2 overflow-hidden rounded-full bg-neutral-200">
+        <div
+          className="h-full rounded-full transition-all duration-500 ease-out"
+          style={{width: `${score ?? 0}%`, backgroundColor: color}}
+        />
       </div>
-      <div className="w-8 text-right font-mono text-xs font-medium text-neutral-700">{score}</div>
     </div>
   );
 }

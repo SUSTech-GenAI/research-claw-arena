@@ -8,7 +8,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "score:ideas": "node scripts/compute-idea-scores.mjs idea/idea-round-1-score-input.json",
+    "test:judge-apis": "node scripts/test-judge-apis.mjs",
+    "judge:ideas": "node scripts/run-idea-judges.mjs"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

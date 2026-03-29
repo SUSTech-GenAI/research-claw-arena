@@ -1,0 +1,32 @@
+{
+  "comparison_scope": "candidate_generation_cost",
+  "weights_profile": "default",
+  "notes": "Current round input built from existing repository logs. Semantic judge scores can be added later under each candidate's judge_scores object.",
+  "candidates": [
+    {
+      "id": "auto-research-claw",
+      "name": "AutoResearchClaw",
+      "source": "idea/AutoResearchClaw/stage1_metrics.json",
+      "idea_text": "Use retriever-provided relevance scores to guide layerwise sparse and dense attention allocation in RAG systems for better efficiency-accuracy tradeoffs.",
+      "time_seconds": 105.963,
+      "total_tokens": 4316
+    },
+    {
+      "id": "dr-claw",
+      "name": "Dr. Claw",
+      "source": "idea/dr-claw/token-usage-summary.json#Idea Generation",
+      "idea_text": "Build a process reward model with explicit epistemic status typing so scientific reasoning can distinguish known facts, false claims, and novel unknowns during test-time search.",
+      "time_seconds": 70.78,
+      "total_tokens": 7096
+    },
+    {
+      "id": "ai-scientist-v2",
+      "name": "AI-SCIENTIST-V2",
+      "source": "idea/AI-SCIENTIST-V2/execution_log_kimi.json",
+      "idea_text": "Treat test-time compute as an experimental budget and allocate it adaptively to high-information reasoning steps in open-domain scientific discovery.",
+      "time_seconds": 85.73,
+      "total_tokens": 8400
+    }
+  ]
+}
+

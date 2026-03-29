@@ -1,0 +1,109 @@
+{
+  "comparison_scope": "candidate_generation_cost",
+  "weights_profile": "default",
+  "notes": "Current round input built from existing repository logs. Semantic judge scores can be added later under each candidate's judge_scores object.",
+  "candidates": [
+    {
+      "id": "auto-research-claw",
+      "name": "AutoResearchClaw",
+      "source": "idea/AutoResearchClaw/stage1_metrics.json",
+      "idea_text": "Use retriever-provided relevance scores to guide layerwise sparse and dense attention allocation in RAG systems for better efficiency-accuracy tradeoffs.",
+      "time_seconds": 105.963,
+      "total_tokens": 4316,
+      "judge_scores": {
+        "openai": {
+          "research_value": 68,
+          "operability": 86,
+          "research_value_reason": "A sensible and potentially useful efficiency idea for RAG, with a concrete mechanism linking retrieval relevance to attention allocation. The likely contribution is practical rather than conceptually deep, and adjacent to existing work on adaptive attention, pruning, and retrieval-aware inference.",
+          "operability_reason": "The target setting, control signal, and optimization goal are all identifiable. It is easy to imagine concrete experiments on RAG benchmarks measuring latency, memory, and answer quality, though exact allocation rules still need to be designed.",
+          "key_strength": "Clear mechanism with an obvious experimental path.",
+          "key_risk": "May be an incremental systems tweak with limited novelty if retriever scores are too noisy or already implicitly used."
+        },
+        "claude": {
+          "research_value": 58,
+          "operability": 72,
+          "research_value_reason": "The idea of using retriever relevance scores to modulate attention sparsity is a reasonable engineering optimization, but it is incremental. The core insight—that less relevant passages deserve less compute—is fairly obvious. The contribution would mainly be an efficiency trick rather than a conceptual advance. Some value exists in systematically studying the tradeoff, but it lacks depth.",
+          "operability_reason": "Relatively concrete: the input signal (retriever scores) is well-defined, the mechanism (layerwise sparse vs. dense attention) is identifiable, and evaluation via efficiency-accuracy curves on standard RAG benchmarks is straightforward. Some design choices remain (which layers, thresholds, how to implement sparse attention), but these are standard engineering decisions.",
+          "key_strength": "Clear, bounded problem with an identifiable signal and evaluation path.",
+          "key_risk": "The insight may be too shallow—retriever scores are noisy proxies, and the efficiency gains may be marginal compared to simpler baselines like truncation or top-k filtering."
+        },
+        "gemini": {
+          "research_value": 72,
+          "operability": 88,
+          "research_value_reason": "Offers a sensible, mechanistic approach to RAG efficiency, though it represents an incremental architectural optimization rather than a fundamental capability shift.",
+          "operability_reason": "The inputs (retriever scores), mechanism (layerwise sparse/dense attention), and evaluation metrics (efficiency vs. accuracy) are all explicitly defined and standard.",
+          "key_strength": "Highly actionable with a clear, measurable tradeoff.",
+          "key_risk": "The performance gain might be marginal compared to simpler context-pruning methods."
+        }
+      }
+    },
+    {
+      "id": "dr-claw",
+      "name": "Dr. Claw",
+      "source": "idea/dr-claw/token-usage-summary.json#Idea Generation",
+      "idea_text": "Build a process reward model with explicit epistemic status typing so scientific reasoning can distinguish known facts, false claims, and novel unknowns during test-time search.",
+      "time_seconds": 70.78,
+      "total_tokens": 7096,
+      "judge_scores": {
+        "openai": {
+          "research_value": 84,
+          "operability": 68,
+          "research_value_reason": "This has stronger conceptual leverage than the others: explicit epistemic status modeling inside process reward-guided search could improve scientific reasoning, error detection, and novelty handling. If successful, it would go beyond generic reward modeling by adding a more structured notion of knowledge state.",
+          "operability_reason": "There is a visible path—define epistemic categories, collect or synthesize supervision, train a process reward model, and test it in scientific reasoning search—but major design choices remain underspecified. In particular, operationalizing 'novel unknowns' and validating them robustly is nontrivial.",
+          "key_strength": "Introduces a richer reasoning control signal than standard correctness-only reward models.",
+          "key_risk": "Epistemic status labels may be hard to define and supervise reliably, especially for genuinely novel claims."
+        },
+        "claude": {
+          "research_value": 76,
+          "operability": 52,
+          "research_value_reason": "Introducing explicit epistemic status typing into a process reward model is a genuinely interesting conceptual contribution. Distinguishing known facts, false claims, and novel unknowns addresses a real bottleneck in scientific reasoning—models currently conflate confidence with correctness. If it works, it could meaningfully improve reliability of LLM-assisted scientific reasoning and has broader implications for calibration and hallucination detection.",
+          "operability_reason": "The idea is conceptually appealing but underspecified. How are epistemic categories defined and labeled in training data? What taxonomy is used? How do you get ground-truth labels for 'novel unknowns' vs. 'false claims' at scale? The evaluation protocol for scientific reasoning with epistemic typing is unclear. Substantial design work is needed before this becomes a concrete research plan.",
+          "key_strength": "Addresses a genuine and important gap: LLMs lack epistemic self-awareness during reasoning, and building this into the reward model is a non-trivial structural intervention.",
+          "key_risk": "The core challenge—creating reliable epistemic status labels at scale for training—is not addressed and may be prohibitively difficult, especially for the 'novel unknown' category."
+        },
+        "gemini": {
+          "research_value": 86,
+          "operability": 70,
+          "research_value_reason": "Introduces a deep conceptual lever (epistemic typing) to PRMs, directly addressing the critical bottleneck of hallucination vs. discovery in LLM scientific reasoning.",
+          "operability_reason": "The direction is clear, but creating a reliable training signal or dataset for 'epistemic status' at the step level involves substantial underspecified design choices.",
+          "key_strength": "High conceptual novelty targeting a major limitation in current reasoning models.",
+          "key_risk": "Annotating or defining step-level epistemic status for a PRM may prove prohibitively subjective or expensive."
+        }
+      }
+    },
+    {
+      "id": "ai-scientist-v2",
+      "name": "AI-SCIENTIST-V2",
+      "source": "idea/AI-SCIENTIST-V2/execution_log_kimi.json",
+      "idea_text": "Treat test-time compute as an experimental budget and allocate it adaptively to high-information reasoning steps in open-domain scientific discovery.",
+      "time_seconds": 85.73,
+      "total_tokens": 8400,
+      "judge_scores": {
+        "openai": {
+          "research_value": 76,
+          "operability": 52,
+          "research_value_reason": "The idea has meaningful upside because adaptive allocation of test-time compute to the most informative reasoning steps could improve discovery efficiency and search quality. However, the core insight is still fairly abstract and overlaps with broader adaptive inference and compute budgeting themes.",
+          "operability_reason": "The direction is understandable, but key pieces are missing: what counts as a high-information step, how information gain is estimated during reasoning, and what benchmark constitutes open-domain scientific discovery. A workable plan would require inventing substantial missing machinery.",
+          "key_strength": "Potentially broad framework for smarter use of test-time compute in difficult reasoning settings.",
+          "key_risk": "Too vague as stated to convert directly into a reliable research program without major additional specification."
+        },
+        "claude": {
+          "research_value": 50,
+          "operability": 38,
+          "research_value_reason": "The analogy of test-time compute as an experimental budget is appealing at a slogan level, but the idea lacks mechanism-level specificity. Adaptive compute allocation to 'high-information reasoning steps' is a known theme in the test-time compute literature. Without specifying what 'high-information' means or how it is measured in the context of open-domain scientific discovery, this reads as a restatement of existing adaptive computation ideas in a new domain framing.",
+          "operability_reason": "Very underspecified. What is an 'open-domain scientific discovery' task concretely? How are 'high-information reasoning steps' identified? What is the allocation mechanism? What benchmarks or evaluation protocols would be used? Nearly every major design choice is left open, making this extremely hard to operationalize without inventing most of the research plan.",
+          "key_strength": "The framing of test-time compute as experimental budget could inspire useful analogies if developed further.",
+          "key_risk": "Too vague to distinguish from generic adaptive computation proposals; the 'scientific discovery' framing adds aspiration but not substance."
+        },
+        "gemini": {
+          "research_value": 76,
+          "operability": 50,
+          "research_value_reason": "Framing test-time compute as an experimental budget for high-information steps is an appealing concept for scientific discovery, though slightly generic in its mechanism.",
+          "operability_reason": "'Open-domain scientific discovery' is notoriously difficult to benchmark, and the metric for 'high-information reasoning steps' is left entirely unspecified.",
+          "key_strength": "Strong alignment with current trends in scaling test-time compute.",
+          "key_risk": "The extreme breadth of the target domain and lack of a concrete allocation mechanism make it hard to operationalize."
+        }
+      }
+    }
+  ]
+}

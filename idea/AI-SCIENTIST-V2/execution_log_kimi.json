@@ -1,0 +1,33 @@
+{
+  "execution_info": {
+    "timestamp": "2025-03-28T18:52:00",
+    "model": "kimi-k2.5",
+    "api_provider": "Moonshot",
+    "input_file": "test_idea_kimi.md"
+  },
+  "parameters": {
+    "max_num_generations": 1,
+    "num_reflections": 5
+  },
+  "time_statistics": {
+    "total_duration_seconds": 85.73,
+    "total_duration_minutes": 1.43,
+    "ideas_generated": 1,
+    "avg_time_per_idea_seconds": 85.73,
+    "fastest_idea_seconds": 85.73,
+    "slowest_idea_seconds": 85.73
+  },
+  "token_statistics": {
+    "model": "kimi-k2.5",
+    "prompt_tokens": 4681,
+    "completion_tokens": 4159,
+    "cached_tokens": 1562,
+    "total_tokens": 8400,
+    "estimated_cost_usd": 0.0
+  },
+  "output_file": "test_idea_kimi.json",
+  "generated_idea_summary": {
+    "name": "information_guided_adaptive_test_time_compute",
+    "title": "Information-Guided Adaptive Test-Time Compute for Open-Domain Scientific Discovery"
+  }
+}
