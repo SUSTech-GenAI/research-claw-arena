@@ -635,20 +635,20 @@ export default function App() {
   return (
     <div className="min-h-screen bg-neutral-50 text-neutral-900 selection:bg-blue-200">
       <header className="sticky top-0 z-20 border-b border-neutral-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:h-16 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-0 lg:px-8">
+          <div className="flex min-w-0 items-center gap-3">
             <div className="rounded-lg bg-blue-600 p-2 text-white">
               <FlaskConical size={20} />
             </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight">Research Claw Arena</h1>
+            <div className="min-w-0">
+              <h1 className="truncate text-lg font-bold tracking-tight sm:text-xl">Research Claw Arena</h1>
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-neutral-500">
                 {pageMeta.label} {text.pageSuffix}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-2 sm:justify-end">
             <div className="flex rounded-md border border-neutral-200 bg-white p-1">
               <button
                 type="button"
@@ -674,7 +674,7 @@ export default function App() {
               href="https://github.com/LetItBe12345/research-claw-arena"
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-2 rounded-md bg-neutral-100 px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-200 hover:text-neutral-900"
+              className="flex shrink-0 items-center gap-2 rounded-md bg-neutral-100 px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-200 hover:text-neutral-900"
             >
               <Github size={16} />
               <span className="hidden sm:inline">{text.githubLabel}</span>
@@ -683,8 +683,37 @@ export default function App() {
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:px-8">
-        <aside className="lg:sticky lg:top-24 lg:h-fit">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <nav className="mb-6 flex gap-3 overflow-x-auto lg:hidden">
+          {pages.map((page) => {
+            const Icon = page.icon;
+            const active = page.id === activePage;
+
+            return (
+              <button
+                key={page.id}
+                type="button"
+                onClick={() => setActivePage(page.id)}
+                className={`flex min-w-[148px] flex-1 items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-all ${
+                  active
+                    ? 'border-blue-200 bg-blue-50 text-blue-900 shadow-sm'
+                    : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50 hover:text-neutral-900'
+                }`}
+              >
+                <div className={`rounded-xl p-2 ${active ? 'bg-blue-600 text-white' : 'bg-neutral-100 text-neutral-500'}`}>
+                  <Icon size={16} />
+                </div>
+                <div className="min-w-0">
+                  <div className="truncate font-semibold">{page.label}</div>
+                  <div className="truncate text-xs text-neutral-500">{page.description}</div>
+                </div>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="grid gap-8 lg:grid-cols-[240px_minmax(0,1fr)]">
+        <aside className="hidden lg:sticky lg:top-24 lg:block lg:h-fit">
           <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-neutral-400">{text.navTitle}</p>
             <nav className="flex gap-3 overflow-x-auto lg:flex-col">
@@ -723,7 +752,7 @@ export default function App() {
           </div>
         </aside>
 
-        <main className="space-y-8">
+        <main className="space-y-6 sm:space-y-8">
           {activePage === 'leaderboards' ? (
             <LeaderboardsPage
               text={text}
@@ -750,6 +779,7 @@ export default function App() {
             />
           )}
         </main>
+        </div>
       </div>
 
       <footer className="mt-12 border-t border-neutral-200 bg-white py-8">
@@ -789,14 +819,14 @@ function LeaderboardsPage({
 }) {
   return (
     <>
-      <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
+      <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-8">
         <div className="max-w-3xl">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700">
             <Trophy size={16} />
             {text.leaderboards.badge}
           </div>
-          <h2 className="mb-4 text-2xl font-bold">{text.leaderboards.title}</h2>
-          <p className="mb-6 leading-relaxed text-neutral-600">{text.leaderboards.intro}</p>
+          <h2 className="mb-4 text-xl font-bold sm:text-2xl">{text.leaderboards.title}</h2>
+          {text.leaderboards.intro ? <p className="mb-6 leading-relaxed text-neutral-600">{text.leaderboards.intro}</p> : null}
           <div className="flex flex-wrap gap-4">
             <div className="flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-700">
               <Lightbulb size={16} />
@@ -818,7 +848,12 @@ function LeaderboardsPage({
           </h3>
           <span className="text-sm text-neutral-500">{text.leaderboards.scoresOutOfHundred}</span>
         </div>
-        <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+        <div className="space-y-4 md:hidden">
+          {clawsWithOverall.map((claw, idx) => (
+            <MobileLeaderboardCard key={claw.id} claw={claw} idx={idx} text={text} />
+          ))}
+        </div>
+        <div className="hidden overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm md:block">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="border-b border-neutral-200 bg-neutral-50 text-xs uppercase tracking-wider text-neutral-500">
@@ -938,7 +973,7 @@ function LeaderboardsPage({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
           <ChartCard
             title={text.leaderboards.charts.capabilityTitle}
             icon={<Lightbulb size={18} className="text-blue-500" />}
@@ -961,7 +996,7 @@ function LeaderboardsPage({
 
       <section>
         <h3 className="mb-4 text-lg font-bold">{text.leaderboards.profilesTitle}</h3>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 2xl:grid-cols-3">
           {clawsWithOverall.map((claw) => (
             <div
               key={claw.id}
@@ -1068,6 +1103,119 @@ function LeaderboardsPage({
   );
 }
 
+function getRankBadgeClasses(idx: number) {
+  if (idx === 0) {
+    return 'bg-amber-100 text-amber-700';
+  }
+  if (idx === 1) {
+    return 'bg-neutral-200 text-neutral-700';
+  }
+  if (idx === 2) {
+    return 'bg-orange-100 text-orange-800';
+  }
+  return 'bg-neutral-100 text-neutral-500';
+}
+
+type MobileLeaderboardCardProps = {
+  key?: string;
+  claw: (typeof clawsWithOverall)[number];
+  idx: number;
+  text: (typeof translations)[Locale];
+};
+
+function MobileLeaderboardCard({
+  claw,
+  idx,
+  text,
+}: MobileLeaderboardCardProps) {
+  return (
+    <div className="overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm">
+      <div className="border-b border-neutral-100 p-4" style={{borderTop: `4px solid ${claw.color}`}}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="mb-3 flex items-center gap-2">
+              <span
+                className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${getRankBadgeClasses(idx)}`}
+              >
+                {idx + 1}
+              </span>
+              <span className="rounded-full bg-neutral-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+                {claw.version}
+              </span>
+            </div>
+            <h4 className="break-words text-lg font-bold leading-tight text-neutral-900">{claw.name}</h4>
+          </div>
+
+          <div className="rounded-2xl border border-neutral-100 bg-neutral-50 px-4 py-3 text-right">
+            <div className="text-3xl font-bold leading-none" style={{color: claw.color}}>
+              {claw.overall}
+            </div>
+            <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
+              {text.leaderboards.table.overall}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-4 p-4">
+        <div className="rounded-2xl border border-neutral-100 bg-neutral-50/80 p-4">
+          <div className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-neutral-400">
+            {text.leaderboards.table.capabilities}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <MobileMetricPill label={text.leaderboards.table.idea} value={claw.scores.idea} color={claw.color} />
+            <MobileMetricPill label={text.leaderboards.table.writing} value={claw.scores.writing} color={claw.color} />
+            <MobileMetricPill label={text.leaderboards.table.plotting} value={claw.scores.plotting} color={claw.color} />
+            <MobileMetricPill
+              label={text.leaderboards.table.experiment}
+              value={claw.scores.experiment}
+              color={claw.color}
+            />
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-neutral-100 bg-neutral-50/80 p-4">
+          <div className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-neutral-400">
+            {text.leaderboards.table.performance}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <MobileMetricPill label={text.leaderboards.table.tokens} value={claw.scores.tokenEff} color={claw.color} />
+            <MobileMetricPill label={text.leaderboards.table.time} value={claw.scores.timeEff} color={claw.color} />
+            <MobileMetricPill
+              label={text.leaderboards.table.completion}
+              value={claw.scores.completion}
+              color={claw.color}
+            />
+            <MobileMetricPill label={text.leaderboards.table.quality} value={claw.scores.quality} color={claw.color} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MobileMetricPill({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: ScoreValue;
+  color: string;
+}) {
+  return (
+    <div className="rounded-2xl bg-white px-3 py-3 shadow-sm ring-1 ring-neutral-100">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">{label}</div>
+      <div className="mt-2 flex items-end justify-between gap-3">
+        <span className="h-2.5 w-12 rounded-full bg-neutral-200">
+          <span className="block h-full rounded-full" style={{width: `${value ?? 0}%`, backgroundColor: color}}></span>
+        </span>
+        <span className="font-mono text-sm font-semibold text-neutral-700">{renderScore(value)}</span>
+      </div>
+    </div>
+  );
+}
+
 function ArenaPage({
   text,
   arenaCards,
@@ -1091,13 +1239,13 @@ function ArenaPage({
 
   return (
     <>
-      <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
+      <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-8">
         <div className="max-w-3xl">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1.5 text-sm font-medium text-neutral-700">
             <FlaskConical size={16} />
             {text.arena.badge}
           </div>
-          <h2 className="mb-4 text-2xl font-bold">{text.arena.title}</h2>
+          <h2 className="mb-4 text-xl font-bold sm:text-2xl">{text.arena.title}</h2>
           <p className="leading-relaxed text-neutral-600">{text.arena.intro}</p>
         </div>
       </section>
@@ -1107,7 +1255,7 @@ function ArenaPage({
           <h3 className="text-lg font-bold">{text.arena.tracksTitle}</h3>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-2">
           {arenaCards.map((card) => {
             const Icon = card.icon;
             const active = activeArena === card.id;
@@ -1119,7 +1267,7 @@ function ArenaPage({
                 key={card.id}
                 type="button"
                 onClick={() => onSelectArena(card.id)}
-                className={`rounded-2xl border bg-white p-6 text-left shadow-sm transition-all ${
+                className={`rounded-2xl border bg-white p-5 text-left shadow-sm transition-all sm:p-6 ${
                   active
                     ? 'border-blue-200 ring-2 ring-blue-100'
                     : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50'
@@ -1147,9 +1295,9 @@ function ArenaPage({
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-        <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-          <div className="mb-5 flex items-center justify-between gap-4">
+      <section className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+        <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-400">{selectedArena.title}</p>
               <h3 className="mt-2 text-lg font-bold">{text.arena.roundPickerTitle}</h3>
@@ -1165,7 +1313,7 @@ function ArenaPage({
             </div>
           </div>
 
-          <div className="grid gap-4">
+          <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1 xl:mx-0 xl:grid xl:gap-4 xl:overflow-visible xl:px-0 xl:pb-0">
             {selectedRounds.map((round) => {
               const active = round.id === activeRound;
               const badgeLabel = active
@@ -1179,7 +1327,7 @@ function ArenaPage({
                   key={round.id}
                   type="button"
                   onClick={() => onSelectRound(round.id)}
-                  className={`rounded-2xl border px-5 py-4 text-left transition-all ${
+                  className={`min-w-[280px] rounded-2xl border px-4 py-4 text-left transition-all sm:min-w-[320px] xl:min-w-0 xl:px-5 ${
                     active
                       ? 'border-blue-200 bg-blue-50 text-blue-900 shadow-sm'
                       : 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50'
@@ -1207,7 +1355,7 @@ function ArenaPage({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-neutral-400">{text.arena.roundDetailsTitle}</p>
           <h3 className="mt-2 text-lg font-bold">
             {selectedRound.label} <span className="text-neutral-400">/ {selectedRound.subtitle}</span>
@@ -1222,10 +1370,10 @@ function ArenaPage({
             </div>
             <div className="space-y-3">
               {clawsWithOverall.map((claw) => (
-                <div key={claw.id} className="flex items-center justify-between rounded-xl bg-white px-3 py-2">
-                  <div className="flex items-center gap-2">
+                <div key={claw.id} className="flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2">
+                  <div className="flex min-w-0 items-center gap-2">
                     <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: claw.color}}></div>
-                    <span className="font-medium text-neutral-800">{claw.name}</span>
+                    <span className="truncate font-medium text-neutral-800">{claw.name}</span>
                   </div>
                   <span className="text-sm text-neutral-500">{claw.version}</span>
                 </div>
@@ -1258,12 +1406,12 @@ function ChartCard({
   emptyMessage?: string;
 }) {
   return (
-    <div className="flex flex-col items-center rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-      <h4 className="mb-6 flex items-center gap-2 font-semibold text-neutral-700">
+    <div className="flex flex-col items-center rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-6">
+      <h4 className="mb-4 flex items-center gap-2 text-sm font-semibold text-neutral-700 sm:mb-6 sm:text-base">
         {icon}
         {title}
       </h4>
-      <div className="h-[300px] w-full">
+      <div className="h-[260px] w-full sm:h-[300px]">
         {data.length === 0 ? (
           <div className="flex h-full items-center justify-center rounded-2xl border border-dashed border-neutral-200 bg-neutral-50/70 text-center text-sm leading-relaxed text-neutral-400">
             <div>
@@ -1378,7 +1526,7 @@ function ScoreBar({
       <div className="mb-2 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2 text-neutral-700">
           <span className="text-neutral-400">{icon}</span>
-          <span className="truncate font-medium">{label}</span>
+          <span className="truncate text-sm font-medium">{label}</span>
         </div>
         <div className="text-right font-mono text-xs font-semibold text-neutral-700">{renderScore(score)}</div>
       </div>
