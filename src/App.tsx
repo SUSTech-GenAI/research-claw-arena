@@ -154,10 +154,9 @@ const translations = {
         'This section points to the future public repository for benchmark task details, experiment details, and related release materials.',
       status: 'Coming Soon',
       cardTitle: 'Task & Experiment Details',
-      cardBody:
-        'This repository is reserved for the future open release of task definitions, experiment details, evaluation setup, and supporting artifacts.',
+      cardBody: '',
       linkLabel: 'Open GitHub repository',
-      linkHint: 'The repository is live, but the contents are intentionally kept in a coming-soon state for now.',
+      linkHint: '',
     },
       leaderboards: {
         badge: 'Leaderboards',
@@ -333,9 +332,9 @@ const translations = {
       intro: '这里汇总未来公开 benchmark 任务细节、实验细节和相关发布材料的外部入口。',
       status: 'Coming Soon',
       cardTitle: '任务与实验细节仓库',
-      cardBody: '该仓库将用于未来公开任务定义、实验细节、评测设置以及相关支撑材料。',
+      cardBody: '',
       linkLabel: '打开 GitHub 仓库',
-      linkHint: '仓库已经创建，但当前内容仍保持为 coming soon 状态。',
+      linkHint: '',
     },
       leaderboards: {
         badge: '排行榜',
@@ -1296,11 +1295,13 @@ function MorePage({
               </a>
             </div>
 
-            <p className="max-w-3xl leading-relaxed text-neutral-600">{text.more.cardBody}</p>
+            {text.more.cardBody ? <p className="max-w-3xl leading-relaxed text-neutral-600">{text.more.cardBody}</p> : null}
 
-            <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4 text-sm leading-relaxed text-neutral-500">
-              {text.more.linkHint}
-            </div>
+            {text.more.linkHint ? (
+              <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4 text-sm leading-relaxed text-neutral-500">
+                {text.more.linkHint}
+              </div>
+            ) : null}
           </div>
         </div>
       </section>
