@@ -21,10 +21,12 @@ import {
   Image as ImageIcon,
   FlaskConical,
   ChevronRight,
+  BookOpen,
+  ExternalLink,
 } from 'lucide-react';
 
 type Locale = 'en' | 'zh-CN';
-type PageId = 'leaderboards' | 'arena';
+type PageId = 'leaderboards' | 'arena' | 'more';
 type ArenaId = 'idea' | 'experiment' | 'writing' | 'plotting';
 type RoundId =
   | 'idea-round-1'
@@ -40,6 +42,7 @@ type ChartDatum = {
 
 const LOCALE_STORAGE_KEY = 'research-claw-arena-locale';
 const LOCALE_QUERY_KEY = 'lang';
+const DETAILS_REPO_URL = 'https://github.com/LetItBe12345/research-claw-arena-details';
 
 const CLAWS = [
   {
@@ -139,6 +142,22 @@ const translations = {
         label: 'Arena',
         description: 'Arena tracks and round selection',
       },
+      more: {
+        label: 'More',
+        description: 'External links and future open details',
+      },
+    },
+    more: {
+      badge: 'More',
+      title: 'More Resources',
+      intro:
+        'This section points to the future public repository for benchmark task details, experiment details, and related release materials.',
+      status: 'Coming Soon',
+      cardTitle: 'Task & Experiment Details',
+      cardBody:
+        'This repository is reserved for the future open release of task definitions, experiment details, evaluation setup, and supporting artifacts.',
+      linkLabel: 'Open GitHub repository',
+      linkHint: 'The repository is live, but the contents are intentionally kept in a coming-soon state for now.',
     },
       leaderboards: {
         badge: 'Leaderboards',
@@ -303,6 +322,20 @@ const translations = {
         label: '竞技场',
         description: '竞技场赛道与回合选择',
       },
+      more: {
+        label: '更多',
+        description: '外部链接与后续开源内容',
+      },
+    },
+    more: {
+      badge: '更多',
+      title: '更多内容',
+      intro: '这里汇总未来公开 benchmark 任务细节、实验细节和相关发布材料的外部入口。',
+      status: 'Coming Soon',
+      cardTitle: '任务与实验细节仓库',
+      cardBody: '该仓库将用于未来公开任务定义、实验细节、评测设置以及相关支撑材料。',
+      linkLabel: '打开 GitHub 仓库',
+      linkHint: '仓库已经创建，但当前内容仍保持为 coming soon 状态。',
     },
       leaderboards: {
         badge: '排行榜',
@@ -551,6 +584,12 @@ function buildPages(text: (typeof translations)[Locale]) {
       description: text.pages.arena.description,
       icon: FlaskConical,
     },
+    {
+      id: 'more' as const,
+      label: text.pages.more.label,
+      description: text.pages.more.description,
+      icon: BookOpen,
+    },
   ];
 }
 
@@ -684,7 +723,7 @@ export default function App() {
       </header>
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <nav className="mb-6 flex gap-3 overflow-x-auto lg:hidden">
+        <nav className="mb-6 grid grid-cols-3 gap-2 sm:gap-3 lg:hidden">
           {pages.map((page) => {
             const Icon = page.icon;
             const active = page.id === activePage;
@@ -694,7 +733,7 @@ export default function App() {
                 key={page.id}
                 type="button"
                 onClick={() => setActivePage(page.id)}
-                className={`flex min-w-[148px] flex-1 items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-all ${
+                className={`flex min-w-0 items-center justify-center gap-2 rounded-2xl border px-3 py-3 text-left transition-all sm:justify-start sm:gap-3 sm:px-4 ${
                   active
                     ? 'border-blue-200 bg-blue-50 text-blue-900 shadow-sm'
                     : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50 hover:text-neutral-900'
@@ -704,8 +743,8 @@ export default function App() {
                   <Icon size={16} />
                 </div>
                 <div className="min-w-0">
-                  <div className="truncate font-semibold">{page.label}</div>
-                  <div className="truncate text-xs text-neutral-500">{page.description}</div>
+                  <div className="truncate text-sm font-semibold">{page.label}</div>
+                  <div className="hidden truncate text-xs text-neutral-500 sm:block">{page.description}</div>
                 </div>
               </button>
             );
@@ -764,7 +803,7 @@ export default function App() {
               onSelectCapability={setActiveCapability}
               activeCapabilityLabel={getArenaLabel(text, activeCapability)}
             />
-          ) : (
+          ) : activePage === 'arena' ? (
             <ArenaPage
               text={text}
               arenaCards={arenaCards}
@@ -777,6 +816,8 @@ export default function App() {
               }}
               onSelectRound={setActiveRound}
             />
+          ) : (
+            <MorePage text={text} />
           )}
         </main>
         </div>
@@ -1213,6 +1254,57 @@ function MobileMetricPill({
         <span className="font-mono text-sm font-semibold text-neutral-700">{renderScore(value)}</span>
       </div>
     </div>
+  );
+}
+
+function MorePage({
+  text,
+}: {
+  text: (typeof translations)[Locale];
+}) {
+  return (
+    <>
+      <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-8">
+        <div className="max-w-3xl">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1.5 text-sm font-medium text-neutral-700">
+            <BookOpen size={16} />
+            {text.more.badge}
+          </div>
+          <h2 className="mb-4 text-xl font-bold sm:text-2xl">{text.more.title}</h2>
+          <p className="leading-relaxed text-neutral-600">{text.more.intro}</p>
+        </div>
+      </section>
+
+      <section>
+        <div className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-amber-100 bg-amber-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">
+                  {text.more.status}
+                </div>
+                <h3 className="text-xl font-bold text-neutral-900">{text.more.cardTitle}</h3>
+              </div>
+              <a
+                href={DETAILS_REPO_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
+              >
+                {text.more.linkLabel}
+                <ExternalLink size={16} />
+              </a>
+            </div>
+
+            <p className="max-w-3xl leading-relaxed text-neutral-600">{text.more.cardBody}</p>
+
+            <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4 text-sm leading-relaxed text-neutral-500">
+              {text.more.linkHint}
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }
 
