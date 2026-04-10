@@ -43,7 +43,7 @@ type ChartDatum = {
 const LOCALE_STORAGE_KEY = 'research-claw-arena-locale';
 const LOCALE_QUERY_KEY = 'lang';
 const DETAILS_REPO_URL = 'https://github.com/SUSTech-GenAI/research-claw-arena-details';
-const DETAILS_REPO_IDEA_URL = `${DETAILS_REPO_URL}/tree/main/idea`;
+const DETAILS_REPO_IDEA_URL = `${DETAILS_REPO_URL}/tree/main/Idea`;
 
 const CLAWS = [
   {
@@ -267,34 +267,34 @@ const translations = {
       experiment: [
         {
           id: 'experiment-round-1' as const,
-          label: 'Round 1',
-          subtitle: 'Core Track',
-          prompt: 'Design a rigorous experimental plan that can evaluate a proposed research idea under realistic constraints.',
-          status: 'ready' as const,
+          label: 'Coming Soon',
+          subtitle: 'Not yet published',
+          prompt: 'Round details for the experiment track will be announced in a future release.',
+          status: 'comingSoon' as const,
           details:
-            'This track focuses on experimental framing, control design, ablation structure, and methodology comparison for research-facing systems.',
+            'This track is not open yet. Prompt, evaluation setup, and release materials will be published when the track opens.',
         },
       ],
       writing: [
         {
           id: 'writing-round-1' as const,
-          label: 'Round 1',
-          subtitle: 'Core Track',
-          prompt: 'Produce a clear, well-structured research write-up that balances technical precision with readability.',
-          status: 'ready' as const,
+          label: 'Coming Soon',
+          subtitle: 'Not yet published',
+          prompt: 'Round details for the writing track will be announced in a future release.',
+          status: 'comingSoon' as const,
           details:
-            'This track focuses on drafting quality, revision judgment, structural clarity, and the communication of technical research content.',
+            'This track is not open yet. Prompt, evaluation setup, and release materials will be published when the track opens.',
         },
       ],
       plotting: [
         {
           id: 'plotting-round-1' as const,
-          label: 'Round 1',
-          subtitle: 'Core Track',
-          prompt: 'Design figures and plots that communicate research findings clearly, accurately, and with strong visual judgment.',
-          status: 'ready' as const,
+          label: 'Coming Soon',
+          subtitle: 'Not yet published',
+          prompt: 'Round details for the plotting track will be announced in a future release.',
+          status: 'comingSoon' as const,
           details:
-            'This track focuses on chart selection, figure composition, visual explanation, and the presentation of evidence in research outputs.',
+            'This track is not open yet. Prompt, evaluation setup, and release materials will be published when the track opens.',
         },
       ],
     },
@@ -445,31 +445,31 @@ const translations = {
       experiment: [
         {
           id: 'experiment-round-1' as const,
-          label: 'Round 1',
-          subtitle: '核心赛道',
-          prompt: '设计一套在真实约束下可执行的实验方案，用于评估某个研究想法的有效性。',
-          status: 'ready' as const,
-          details: '该赛道聚焦实验框架设计、对照设置、消融结构与研究方法比较。',
+          label: '即将上线',
+          subtitle: '尚未发布',
+          prompt: '实验赛道的回合细节将在后续版本中公布。',
+          status: 'comingSoon' as const,
+          details: '该赛道目前尚未开启。任务 prompt、评测设置和发布材料会在赛道开放时统一发布。',
         },
       ],
       writing: [
         {
           id: 'writing-round-1' as const,
-          label: 'Round 1',
-          subtitle: '核心赛道',
-          prompt: '产出一份结构清晰、表达准确且兼顾可读性的研究写作内容。',
-          status: 'ready' as const,
-          details: '该赛道聚焦草稿质量、修订判断、结构组织与科研技术内容的表达能力。',
+          label: '即将上线',
+          subtitle: '尚未发布',
+          prompt: '写作赛道的回合细节将在后续版本中公布。',
+          status: 'comingSoon' as const,
+          details: '该赛道目前尚未开启。任务 prompt、评测设置和发布材料会在赛道开放时统一发布。',
         },
       ],
       plotting: [
         {
           id: 'plotting-round-1' as const,
-          label: 'Round 1',
-          subtitle: '核心赛道',
-          prompt: '设计能够准确传达研究结果的图表与可视化方案，兼顾信息密度与表达质量。',
-          status: 'ready' as const,
-          details: '该赛道聚焦图表类型选择、图形结构设计、视觉表达判断与科研证据呈现能力。',
+          label: '即将上线',
+          subtitle: '尚未发布',
+          prompt: '绘图赛道的回合细节将在后续版本中公布。',
+          status: 'comingSoon' as const,
+          details: '该赛道目前尚未开启。任务 prompt、评测设置和发布材料会在赛道开放时统一发布。',
         },
       ],
     },
@@ -609,7 +609,7 @@ function buildArenaCards(text: (typeof translations)[Locale]) {
       blurb: text.arenaCards.experiment.blurb,
       accent: 'bg-emerald-50 text-emerald-700 border-emerald-100',
       icon: FlaskConical,
-      status: 'available' as const,
+      status: 'comingSoon' as const,
     },
     {
       id: 'writing' as const,
@@ -617,7 +617,7 @@ function buildArenaCards(text: (typeof translations)[Locale]) {
       blurb: text.arenaCards.writing.blurb,
       accent: 'bg-amber-50 text-amber-700 border-amber-100',
       icon: PenTool,
-      status: 'available' as const,
+      status: 'comingSoon' as const,
     },
     {
       id: 'plotting' as const,
@@ -625,7 +625,7 @@ function buildArenaCards(text: (typeof translations)[Locale]) {
       blurb: text.arenaCards.plotting.blurb,
       accent: 'bg-violet-50 text-violet-700 border-violet-100',
       icon: ImageIcon,
-      status: 'available' as const,
+      status: 'comingSoon' as const,
     },
   ];
 }
@@ -1375,7 +1375,7 @@ function ArenaPage({
                 <p className="mb-5 text-sm leading-relaxed text-neutral-600">{card.blurb}</p>
 
                 <div className="flex items-center gap-2 text-sm font-medium text-neutral-500">
-                  {text.arena.enterTrack}
+                  {card.status === 'available' ? text.arena.enterTrack : text.arena.statuses.comingSoon}
                   <ChevronRight size={16} />
                 </div>
               </>
