@@ -709,7 +709,7 @@ export default function App() {
             </div>
 
             <a
-              href="https://github.com/LetItBe12345/research-claw-arena"
+              href="https://github.com/SUSTech-GenAI/research-claw-arena"
               target="_blank"
               rel="noreferrer"
               className="flex shrink-0 items-center gap-2 rounded-md bg-neutral-100 px-3 py-1.5 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-200 hover:text-neutral-900"
