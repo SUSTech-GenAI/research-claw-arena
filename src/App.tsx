@@ -42,7 +42,8 @@ type ChartDatum = {
 
 const LOCALE_STORAGE_KEY = 'research-claw-arena-locale';
 const LOCALE_QUERY_KEY = 'lang';
-const DETAILS_REPO_URL = 'https://github.com/LetItBe12345/research-claw-arena-details';
+const DETAILS_REPO_URL = 'https://github.com/SUSTech-GenAI/research-claw-arena-details';
+const DETAILS_REPO_IDEA_URL = `${DETAILS_REPO_URL}/tree/main/idea`;
 
 const CLAWS = [
   {
@@ -1354,18 +1355,13 @@ function ArenaPage({
             const active = activeArena === card.id;
             const statusLabel =
               card.status === 'available' ? text.arena.statuses.available : text.arena.statuses.comingSoon;
-
-            return (
-              <button
-                key={card.id}
-                type="button"
-                onClick={() => onSelectArena(card.id)}
-                className={`rounded-2xl border bg-white p-5 text-left shadow-sm transition-all sm:p-6 ${
-                  active
-                    ? 'border-blue-200 ring-2 ring-blue-100'
-                    : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50'
-                }`}
-              >
+            const cardClassName = `rounded-2xl border bg-white p-5 text-left shadow-sm transition-all sm:p-6 ${
+              active
+                ? 'border-blue-200 ring-2 ring-blue-100'
+                : 'border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50'
+            }`;
+            const cardBody = (
+              <>
                 <div className="mb-5 flex items-start justify-between gap-4">
                   <div className={`rounded-2xl border px-3 py-2 ${card.accent}`}>
                     <Icon size={18} />
@@ -1382,6 +1378,26 @@ function ArenaPage({
                   {text.arena.enterTrack}
                   <ChevronRight size={16} />
                 </div>
+              </>
+            );
+
+            if (card.id === 'idea') {
+              return (
+                <a
+                  key={card.id}
+                  href={DETAILS_REPO_IDEA_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={cardClassName}
+                >
+                  {cardBody}
+                </a>
+              );
+            }
+
+            return (
+              <button key={card.id} type="button" onClick={() => onSelectArena(card.id)} className={cardClassName}>
+                {cardBody}
               </button>
             );
           })}
