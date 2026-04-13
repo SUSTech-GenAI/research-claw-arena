@@ -1,4 +1,4 @@
-import {ReactNode, useEffect, useState} from 'react';
+import {FormEvent, ReactNode, useEffect, useState} from 'react';
 import {
   Radar,
   RadarChart,
@@ -23,6 +23,10 @@ import {
   ChevronRight,
   BookOpen,
   ExternalLink,
+  Mail,
+  Paperclip,
+  Send,
+  X,
 } from 'lucide-react';
 
 type Locale = 'en' | 'zh-CN';
@@ -39,11 +43,21 @@ type ChartDatum = {
   subject: string;
   arenaId?: ArenaId;
 } & Record<string, string | number | undefined>;
+type SubmissionStatus = 'idle' | 'sending' | 'success' | 'error';
+type SubmissionFormValues = {
+  modelName: string;
+  email: string;
+  message: string;
+  attachment: File | null;
+};
 
 const LOCALE_STORAGE_KEY = 'research-claw-arena-locale';
 const LOCALE_QUERY_KEY = 'lang';
 const DETAILS_REPO_URL = 'https://github.com/SUSTech-GenAI/research-claw-arena-details';
 const DETAILS_REPO_IDEA_URL = `${DETAILS_REPO_URL}/tree/main/Idea`;
+const SUBMISSION_EMAIL = 'guanghaojin56@gmail.com';
+const SUBMISSION_ENDPOINT = `https://formsubmit.co/ajax/${SUBMISSION_EMAIL}`;
+const MAX_ATTACHMENT_SIZE_BYTES = 10 * 1024 * 1024;
 
 const CLAWS = [
   {
@@ -158,6 +172,36 @@ const translations = {
       cardBody: '',
       linkLabel: 'Open GitHub repository',
       linkHint: '',
+      submissionTitle: 'Submit your model or framework',
+      submissionBody:
+        'Share your model or framework with the Research Claw Arena team through a built-in email form, with optional supporting file upload.',
+      submissionButton: 'Open submission form',
+      submissionRecipientLabel: 'Recipient',
+      submissionRecipientValue: SUBMISSION_EMAIL,
+      submissionRecipientHint: 'Submissions are sent directly by email.',
+      formTitle: 'Submit your model or framework',
+      formIntro: 'Fill in your email, describe your work, and optionally attach one supporting file.',
+      formModelNameLabel: 'Model / Framework name',
+      formModelNamePlaceholder: 'AutoResearchClaw Next',
+      formEmailLabel: 'Your email',
+      formEmailPlaceholder: 'name@example.com',
+      formMessageLabel: 'Submission details',
+      formMessagePlaceholder:
+        'Describe your model or framework, its core idea, and any links or context you want us to review.',
+      formAttachmentLabel: 'Attachment (optional)',
+      formAttachmentHint: 'Upload one file up to 10 MB.',
+      formSelectedFileLabel: 'Selected file',
+      formCancel: 'Cancel',
+      formClose: 'Close',
+      formSend: 'Send submission',
+      formSending: 'Sending...',
+      formSuccess: 'Thanks — your submission has been sent.',
+      formError: 'We could not send the submission right now. Please try again or use direct email.',
+      formValidationModelName: 'Please enter the model or framework name.',
+      formValidationEmail: 'Please enter a valid email address.',
+      formValidationMessage: 'Please provide the submission details.',
+      formValidationFileSize: 'Please upload a file smaller than 10 MB.',
+      formDirectEmail: 'Direct email',
     },
       leaderboards: {
         badge: 'Leaderboards',
@@ -336,6 +380,34 @@ const translations = {
       cardBody: '',
       linkLabel: '打开 GitHub 仓库',
       linkHint: '',
+      submissionTitle: '提交你的模型或框架',
+      submissionBody: '通过内置邮件表单提交你的模型或 framework，并可附带一份补充文件。',
+      submissionButton: '打开提交表单',
+      submissionRecipientLabel: '收件人',
+      submissionRecipientValue: SUBMISSION_EMAIL,
+      submissionRecipientHint: '提交内容会直接通过邮件发送。',
+      formTitle: '提交你的模型或框架',
+      formIntro: '填写你的邮箱、介绍内容，并可选上传一份附件。',
+      formModelNameLabel: '模型 / Framework 名称',
+      formModelNamePlaceholder: 'AutoResearchClaw Next',
+      formEmailLabel: '你的邮箱',
+      formEmailPlaceholder: 'name@example.com',
+      formMessageLabel: '提交内容',
+      formMessagePlaceholder: '介绍你的模型或 framework、核心思路，以及希望我们查看的链接或补充说明。',
+      formAttachmentLabel: '附件（可选）',
+      formAttachmentHint: '支持上传 1 个不超过 10 MB 的文件。',
+      formSelectedFileLabel: '已选择文件',
+      formCancel: '取消',
+      formClose: '关闭',
+      formSend: '发送提交',
+      formSending: '发送中...',
+      formSuccess: '已成功发送，感谢你的提交。',
+      formError: '暂时发送失败，请重试或直接发邮件。',
+      formValidationModelName: '请填写模型或框架名称。',
+      formValidationEmail: '请填写有效的邮箱地址。',
+      formValidationMessage: '请填写提交内容。',
+      formValidationFileSize: '请上传小于 10 MB 的文件。',
+      formDirectEmail: '直接发邮件',
     },
       leaderboards: {
         badge: '排行榜',
@@ -638,6 +710,25 @@ function getArenaLabel(text: (typeof translations)[Locale], arena: ArenaId) {
   return text.arenaCards[arena].title;
 }
 
+function formatFileSize(size: number) {
+  if (size < 1024 * 1024) {
+    return `${Math.round(size / 1024)} KB`;
+  }
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function isValidEmail(email: string) {
+  return /\S+@\S+\.\S+/.test(email);
+}
+
+function buildSubmissionMailtoHref(values: Pick<SubmissionFormValues, 'modelName' | 'email' | 'message'>) {
+  const params = new URLSearchParams({
+    subject: `Research Claw Arena submission: ${values.modelName || 'New model/framework'}`,
+    body: [`Model / Framework: ${values.modelName}`, `Email: ${values.email}`, '', values.message].join('\n'),
+  });
+  return `mailto:${SUBMISSION_EMAIL}?${params.toString()}`;
+}
+
 export default function App() {
   const [locale, setLocale] = useState<Locale>(() => getInitialLocale());
   const [activePage, setActivePage] = useState<PageId>('leaderboards');
@@ -645,6 +736,7 @@ export default function App() {
   const [activeCapability, setActiveCapability] = useState<ArenaId>('idea');
   const [activeArena, setActiveArena] = useState<ArenaId>('idea');
   const [activeRound, setActiveRound] = useState<RoundId>('idea-round-1');
+  const [isSubmissionModalOpen, setIsSubmissionModalOpen] = useState(false);
 
   const text = translations[locale];
   const pages = buildPages(text);
@@ -657,6 +749,27 @@ export default function App() {
   useEffect(() => {
     syncLocale(locale, text.siteTitle);
   }, [locale, text.siteTitle]);
+
+  useEffect(() => {
+    if (!isSubmissionModalOpen) {
+      return;
+    }
+
+    const {overflow} = document.body.style;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsSubmissionModalOpen(false);
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = overflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isSubmissionModalOpen]);
 
   const toggleClaw = (id: string) => {
     if (selectedClaws.includes(id)) {
@@ -817,7 +930,7 @@ export default function App() {
               onSelectRound={setActiveRound}
             />
           ) : (
-            <MorePage text={text} />
+            <MorePage text={text} onOpenSubmissionModal={() => setIsSubmissionModalOpen(true)} />
           )}
         </main>
         </div>
@@ -831,6 +944,10 @@ export default function App() {
           <p className="mt-2">{text.footer.note}</p>
         </div>
       </footer>
+
+      {isSubmissionModalOpen ? (
+        <SubmissionModal text={text} onClose={() => setIsSubmissionModalOpen(false)} />
+      ) : null}
     </div>
   );
 }
@@ -1259,8 +1376,10 @@ function MobileMetricPill({
 
 function MorePage({
   text,
+  onOpenSubmissionModal,
 }: {
   text: (typeof translations)[Locale];
+  onOpenSubmissionModal: () => void;
 }) {
   return (
     <>
@@ -1275,7 +1394,7 @@ function MorePage({
         </div>
       </section>
 
-      <section>
+      <section className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
         <div className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="flex flex-col gap-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -1305,8 +1424,286 @@ function MorePage({
             ) : null}
           </div>
         </div>
+
+        <div className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
+            <Mail size={14} />
+            {text.more.badge}
+          </div>
+          <h3 className="text-xl font-bold text-neutral-900">{text.more.submissionTitle}</h3>
+          <p className="mt-3 leading-relaxed text-neutral-600">{text.more.submissionBody}</p>
+
+          <div className="mt-5 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
+            <div className="text-xs font-bold uppercase tracking-[0.18em] text-neutral-400">
+              {text.more.submissionRecipientLabel}
+            </div>
+            <div className="mt-2 text-sm font-semibold text-neutral-900">{text.more.submissionRecipientValue}</div>
+            <div className="mt-1 text-sm text-neutral-500">{text.more.submissionRecipientHint}</div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onOpenSubmissionModal}
+            className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+          >
+            {text.more.submissionButton}
+            <ChevronRight size={16} />
+          </button>
+        </div>
       </section>
     </>
+  );
+}
+
+function SubmissionModal({
+  text,
+  onClose,
+}: {
+  text: (typeof translations)[Locale];
+  onClose: () => void;
+}) {
+  const [values, setValues] = useState<SubmissionFormValues>({
+    modelName: '',
+    email: '',
+    message: '',
+    attachment: null,
+  });
+  const [status, setStatus] = useState<SubmissionStatus>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [fileInputKey, setFileInputKey] = useState(0);
+
+  const mailtoHref = buildSubmissionMailtoHref(values);
+
+  const updateValues = (patch: Partial<SubmissionFormValues>) => {
+    setValues((current) => ({...current, ...patch}));
+    if (status !== 'sending') {
+      setStatus('idle');
+      setErrorMessage('');
+    }
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const modelName = values.modelName.trim();
+    const email = values.email.trim();
+    const message = values.message.trim();
+
+    if (!modelName) {
+      setStatus('error');
+      setErrorMessage(text.more.formValidationModelName);
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setStatus('error');
+      setErrorMessage(text.more.formValidationEmail);
+      return;
+    }
+
+    if (!message) {
+      setStatus('error');
+      setErrorMessage(text.more.formValidationMessage);
+      return;
+    }
+
+    if (values.attachment && values.attachment.size > MAX_ATTACHMENT_SIZE_BYTES) {
+      setStatus('error');
+      setErrorMessage(text.more.formValidationFileSize);
+      return;
+    }
+
+    setStatus('sending');
+    setErrorMessage('');
+
+    try {
+      const formData = new FormData();
+      formData.append('_subject', `Research Claw Arena submission: ${modelName}`);
+      formData.append('_replyto', email);
+      formData.append('_template', 'table');
+      formData.append('model_name', modelName);
+      formData.append('email', email);
+      formData.append('message', message);
+      formData.append('submission_recipient', SUBMISSION_EMAIL);
+      if (values.attachment) {
+        formData.append('attachment', values.attachment);
+      }
+
+      const response = await fetch(SUBMISSION_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+        },
+        body: formData,
+      });
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok || result?.success === 'false') {
+        throw new Error(result?.message || 'Submission failed');
+      }
+
+      setStatus('success');
+      setValues({
+        modelName: '',
+        email: '',
+        message: '',
+        attachment: null,
+      });
+      setFileInputKey((current) => current + 1);
+    } catch {
+      setStatus('error');
+      setErrorMessage(text.more.formError);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/55 px-4 py-6 backdrop-blur-sm" onClick={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="submission-modal-title"
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-neutral-200 bg-white shadow-2xl"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-neutral-100 px-5 py-5 sm:px-6">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
+              <Mail size={14} />
+              {text.more.badge}
+            </div>
+            <h3 id="submission-modal-title" className="mt-3 text-xl font-bold text-neutral-900 sm:text-2xl">
+              {text.more.formTitle}
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-neutral-600">{text.more.formIntro}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl border border-neutral-200 p-2 text-neutral-500 transition-colors hover:bg-neutral-50 hover:text-neutral-900"
+            aria-label={text.more.formClose}
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <form className="space-y-5 px-5 py-5 sm:px-6 sm:py-6" onSubmit={handleSubmit} noValidate>
+          <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4">
+            <div className="text-xs font-bold uppercase tracking-[0.18em] text-neutral-400">
+              {text.more.submissionRecipientLabel}
+            </div>
+            <div className="mt-2 text-sm font-semibold text-neutral-900">{text.more.submissionRecipientValue}</div>
+          </div>
+
+          {status === 'success' ? (
+            <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+              {text.more.formSuccess}
+            </div>
+          ) : null}
+
+          {status === 'error' && errorMessage ? (
+            <div className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+              {errorMessage}
+            </div>
+          ) : null}
+
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <label className="block">
+              <div className="mb-2 text-sm font-semibold text-neutral-700">{text.more.formModelNameLabel}</div>
+              <input
+                type="text"
+                value={values.modelName}
+                onChange={(event) => updateValues({modelName: event.target.value})}
+                className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
+                placeholder={text.more.formModelNamePlaceholder}
+              />
+            </label>
+
+            <label className="block">
+              <div className="mb-2 text-sm font-semibold text-neutral-700">{text.more.formEmailLabel}</div>
+              <input
+                type="email"
+                value={values.email}
+                onChange={(event) => updateValues({email: event.target.value})}
+                autoComplete="email"
+                className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
+                placeholder={text.more.formEmailPlaceholder}
+              />
+            </label>
+          </div>
+
+          <label className="block">
+            <div className="mb-2 text-sm font-semibold text-neutral-700">{text.more.formMessageLabel}</div>
+            <textarea
+              value={values.message}
+              onChange={(event) => updateValues({message: event.target.value})}
+              rows={7}
+              className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
+              placeholder={text.more.formMessagePlaceholder}
+            />
+          </label>
+
+          <div>
+            <div className="mb-2 text-sm font-semibold text-neutral-700">{text.more.formAttachmentLabel}</div>
+            <label className="flex cursor-pointer flex-col gap-3 rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 px-4 py-4 transition-colors hover:border-blue-300 hover:bg-blue-50/40">
+              <div className="flex items-center gap-2 text-sm font-medium text-neutral-700">
+                <Paperclip size={16} className="text-blue-600" />
+                {text.more.formAttachmentHint}
+              </div>
+              <div className="inline-flex w-fit items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm ring-1 ring-neutral-200 transition-colors hover:bg-neutral-100">
+                <Paperclip size={16} />
+                {text.more.formAttachmentLabel}
+              </div>
+              <input
+                key={fileInputKey}
+                type="file"
+                className="hidden"
+                onChange={(event) => updateValues({attachment: event.target.files?.[0] ?? null})}
+              />
+            </label>
+            {values.attachment ? (
+              <div className="mt-3 rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-600">
+                <div className="text-xs font-bold uppercase tracking-[0.18em] text-neutral-400">
+                  {text.more.formSelectedFileLabel}
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className="font-medium text-neutral-900">{values.attachment.name}</span>
+                  <span>·</span>
+                  <span>{formatFileSize(values.attachment.size)}</span>
+                </div>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="flex flex-col-reverse gap-3 border-t border-neutral-100 pt-2 sm:flex-row sm:items-center sm:justify-between">
+            <a
+              href={mailtoHref}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 hover:text-neutral-900"
+            >
+              {text.more.formDirectEmail}
+              <ExternalLink size={16} />
+            </a>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                onClick={onClose}
+                className="inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50 hover:text-neutral-900"
+              >
+                {text.more.formCancel}
+              </button>
+              <button
+                type="submit"
+                disabled={status === 'sending'}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+              >
+                <Send size={16} />
+                {status === 'sending' ? text.more.formSending : text.more.formSend}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }
 
